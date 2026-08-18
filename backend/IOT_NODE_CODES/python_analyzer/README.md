@@ -1,42 +1,44 @@
-# RF24 Scanner — Analizador Python
+# RF24 Scanner — Python Analyzer
 
-## Requisitos
+## Requirements
 - Python 3.9+
 
-## Instalación
+## Installation
 
 ```bash
 cd python_analyzer
 pip install -r requirements.txt
 ```
 
-## Uso
+## Usage
 
-### Todos los nodos
+### All nodes
 ```bash
 python analyzer.py scan.csv
 ```
 
-### Solo un nodo
+### Single node only
 ```bash
 python analyzer.py scan.csv --slot 1
 ```
 
-### Nombre de salida personalizado
+### Custom output name
 ```bash
-python analyzer.py scan.csv --output mapa_zona.html
+python analyzer.py scan.csv --output zone_map.html
 ```
 
-## Resultado
+## Result
 
-Abre el `.html` generado en cualquier navegador.
-Incluye mapa de calor, marcadores por nodo, leyenda y estadísticas.
+Open the generated `.html` file in any browser.
+It includes a heat map, node markers, a legend, and statistics.
 
-## Escala de colores
+## Color scale
 
-| Color    | RSSI        | Calidad   |
-|----------|-------------|-----------|
-| Verde    | > -60 dBm  | Excelente |
-| Amarillo | -60 a -70  | Buena     |
-| Naranja  | -70 a -80  | Regular   |
-| Rojo     | < -80 dBm  | Débil     |
+| Color     | RSSI        | Quality   |
+|-----------|-------------|-----------|
+| Green     | > -60 dBm   | Excellent |
+| Yellow    | -60 to -70  | Good      |
+| Orange    | -70 to -80  | Fair      |
+| Red       | < -80 dBm   | Weak      |
+
+![Heatmap in the zone](./Heatmap_NRF24.png)

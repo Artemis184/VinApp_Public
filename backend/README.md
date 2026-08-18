@@ -1,11 +1,11 @@
-# 🛡️ Backend – Proyecto de Vinculación
+# 🛡️ Backend – VinApp Project
 
-Backend del sistema desarrollado para el **Proyecto de Vinculación**, orientado al control de nodos, gestión de usuarios, roles, auditorías y notificaciones.  
-Construido con **Node.js, Express, Prisma y TypeScript**.
+Backend of the system developed for the **VinApp project**, focused on node control, user management, roles, auditing, and notifications.
+Built with **Node.js, Express, Prisma, and TypeScript**.
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+## 🚀 Technologies Used
 
 - Node.js
 - TypeScript
@@ -21,7 +21,7 @@ Construido con **Node.js, Express, Prisma y TypeScript**.
 
 ---
 
-## 📂 Estructura del Proyecto
+## 📂 Project Structure
 
 ```txt
 src/
@@ -42,48 +42,48 @@ README.md
 
 ---
 
-## ⚙️ Requisitos Previos
+## ⚙️ Prerequisites
 
-- Node.js v18 o superior
-- PostgreSQL v13 o superior
-- npm v9 o superior
+- Node.js v18 or higher
+- PostgreSQL v13 or higher
+- npm v9 or higher
 
 ---
 
-## 🔐 Variables de Entorno
+## 🔐 Environment Variables
 
-Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+Create a `.env` file in the project root with the following content:
 
 ```env
 PORT=3000
 DATABASE_URL="postgresql://usuario:password@localhost:5432/VinApp?schema=public"
 JWT_SECRET="change_me_jwt_secret"
 
-# 🔑 HMAC Secret - Clave para hashear refresh tokens
-# Genera un valor aleatorio seguro en producción
+# 🔑 HMAC Secret - Key used to hash refresh tokens
+# Generate a secure random value in production
 HMAC_SECRET="change_me_hmac_secret_random_value"
 
 MAESTRO_IP=192.168.4.X
 MAESTRO_PORT=80
 
-# Método de comunicación con nodos hijos
-# rf   -> usa maestro RF24 (comportamiento actual)
-# wifi -> POST directo a nodos hijos vía /cmd
-# auto -> si rf_address parece IP/URL usa wifi; caso contrario rf
+# Method for communication with child nodes
+# rf   -> uses the RF24 master (current behavior)
+# wifi -> direct POST to child nodes via /cmd
+# auto -> if rf_address looks like IP/URL use wifi; otherwise rf
 NODE_COMM_MODE=rf
 
-# Endpoint WiFi por defecto para nodos (opcional)
-# Si no se define, se usa rf_address del nodo como host/url
+# Default WiFi endpoint for nodes (optional)
+# If not defined, rf_address of the node is used as the host/url
 NODE_WIFI_ENDPOINT=
 
-# Para cada nodo también puedes guardar su IP en BD (campo nodes.ip_address)
-# Ejemplo: 192.168.18.2 o http://192.168.18.2
+# You can also store each node IP in the DB (field nodes.ip_address)
+# Example: 192.168.18.2 or http://192.168.18.2
 
-# Token compartido para comandos WiFi a nodos hijos
-# Acepta decimal o hexadecimal (ej: 0xA13F92C7)
+# Shared token for WiFi commands to child nodes
+# Accepts decimal or hexadecimal (example: 0xA13F92C7)
 NODE_WIFI_SHARED_TOKEN=0xCHANGE_ME
 
-# 🔐 API Key para autenticación del Arduino Maestro
+# 🔐 API Key for Arduino Maestro authentication
 ARDUINO_API_KEY=change_me_arduino_api_key
 ENABLE_HEARTBEAT=false
 HEARTBEAT_INTERVAL_MS=60000
@@ -99,7 +99,7 @@ GOOGLE_REDIRECT_URI_EMAIL=https://developers.google.com/oauthplayground
 GMAIL_REFRESH_TOKEN=
 GMAIL_ACCESS_TOKEN=
 
-# Auth cookies (desarrollo local)
+# Auth cookies (local development)
 ACCESS_TOKEN_COOKIE_NAME=vin_access_token
 REFRESH_TOKEN_COOKIE_NAME=vin_refresh_token
 CSRF_COOKIE_NAME=vin_csrf_token
@@ -113,7 +113,7 @@ AUTH_LOGIN_RATE_LIMIT_MAX=8
 AUTH_REFRESH_RATE_LIMIT_MAX=10
 ```
 
-Para despliegue en producción, usa valores explícitos para dominio y seguridad de cookies:
+For production deployment, use explicit values for domain and cookie security:
 
 ```env
 NODE_ENV=production
@@ -121,14 +121,14 @@ ACCESS_TOKEN_COOKIE_NAME=vin_access_token
 REFRESH_TOKEN_COOKIE_NAME=vin_refresh_token
 CSRF_COOKIE_NAME=vin_csrf_token
 CSRF_HEADER_NAME=x-csrf-token
-AUTH_COOKIE_DOMAIN=.tu-dominio.com
+AUTH_COOKIE_DOMAIN=.your-domain.com
 
-# Si frontend y backend están en dominios distintos, usa none + secure=true
+# If frontend and backend are on different domains, use none + secure=true
 AUTH_COOKIE_SAMESITE=none
 AUTH_COOKIE_SECURE=true
 AUTH_COOKIE_PRIORITY=high
 
-# Rate limit de endpoints de autenticación
+# Rate limit for authentication endpoints
 AUTH_RATE_LIMIT_WINDOW_MS=60000
 AUTH_LOGIN_RATE_LIMIT_MAX=8
 AUTH_REFRESH_RATE_LIMIT_MAX=10
@@ -136,65 +136,65 @@ AUTH_REFRESH_RATE_LIMIT_MAX=10
 
 ---
 
-## 🔐 Gestión de Sesiones y Tokens
+## 🔐 Session and Token Management
 
-### 📋 Descripción General
+### 📋 Overview
 
-El sistema implementa un **modelo de sesiones persistentes** basado en refresh tokens hasheados con HMAC-SHA256. Las sesiones están vinculadas a dispositivos específicos, lo que permite:
+The system implements a **persistent session model** based on refresh tokens hashed with HMAC-SHA256. Sessions are bound to specific devices, which allows:
 
-- Múltiples sesiones simultáneas por usuario (una por dispositivo)
-- Revocación granular de sesiones específicas
-- Revocación masiva de todas las sesiones de un usuario
-- Limpieza automática de sesiones expiradas y revocadas
+- Multiple simultaneous sessions per user (one per device)
+- Granular revocation of specific sessions
+- Mass revocation of all sessions for a user
+- Automatic cleanup of expired and revoked sessions
 
 ### 🔐 HMAC Secret (`HMAC_SECRET`)
 
-**Propósito:**
-El `HMAC_SECRET` es una clave criptográfica utilizada para hashear los **refresh tokens** antes de almacenarlos en la base de datos. Esto proporciona una capa adicional de seguridad:
+**Purpose:**
+The `HMAC_SECRET` is a cryptographic key used to hash **refresh tokens** before storing them in the database. This adds another security layer:
 
-1. **Nunca se almacena el token en texto plano** – Se guarda solo el hash
-2. **Si la BD es comprometida**, los tokens no pueden ser utilizados directamente
-3. **Validación segura** – El servidor regenera el hash y lo compara
+1. **The token is never stored in plain text** – only the hash is saved
+2. **If the DB is compromised**, tokens cannot be used directly
+3. **Secure validation** – the server regenerates the hash and compares it
 
-**Flujo HMAC:**
+**HMAC flow:**
 
 ```
-Refresh Token (generado)
+Refresh Token (generated)
         ↓
 HMAC-SHA256(token, HMAC_SECRET)
         ↓
-Hash (se almacena en BD)
+Hash (stored in DB)
         ↓
-[Validación] Regenerar hash y comparar
+[Validation] Regenerate hash and compare
 ```
 
-**Configuración:**
+**Configuration:**
 
-- **Desarrollo:** Se usa un valor por defecto (no seguro)
-- **Producción:** Debe ser un valor aleatorio y seguro (mínimo 32 caracteres)
+- **Development:** A default value is used (not secure)
+- **Production:** Must be a random and secure value (minimum 32 characters)
 
-**Generar un valor seguro:**
+**Generate a secure value:**
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-### 🔄 Revocación de Sesiones
+### 🔄 Session Revocation
 
-El sistema proporciona dos tipos de revocación:
+The system provides two types of revocation:
 
-#### 1. **Revocación Individual (Logout de un dispositivo)**
+#### 1. **Individual Revocation (Logout from one device)**
 
 ```typescript
-// Revocar sesión de un dispositivo específico
+// Revoke the session for a specific device
 await SessionService.revokeDeviceSession(userId, deviceId);
 ```
 
-**Comportamiento:**
+**Behavior:**
 
-- Se marca la sesión como `is_revoked = true`
-- Se registra la razón: `LOGOUT`
-- El socket WebSocket del usuario recibe el evento:
+- The session is marked as `is_revoked = true`
+- The reason is recorded: `LOGOUT`
+- The user WebSocket receives the event:
 
 ```javascript
 {
@@ -204,23 +204,23 @@ await SessionService.revokeDeviceSession(userId, deviceId);
 }
 ```
 
-#### 2. **Revocación Masiva (Cerrar todas las sesiones)**
+#### 2. **Mass Revocation (Close all sessions)**
 
 ```typescript
-// Revocar todas las sesiones de un usuario
+// Revoke all sessions for a user
 await SessionService.revokeAllUserSessions(userId);
 ```
 
-**Ejemplos de uso:**
+**Examples of use:**
 
-- Usuario cambió contraseña → Forzar re-autenticación en todos los dispositivos
-- Suspensión de cuenta → Desconectar inmediatamente
-- Actividad sospechosa → Cerrar sesiones activas
+- User changed password → Force reauthentication on all devices
+- Account suspension → Disconnect immediately
+- Suspicious activity → Close active sessions
 
-**Comportamiento:**
+**Behavior:**
 
-- Se revocan TODAS las sesiones no vencidas del usuario
-- Los sockets WebSocket reciben el evento:
+- All non-expired sessions for the user are revoked
+- WebSockets receive the event:
 
 ```javascript
 {
@@ -229,30 +229,30 @@ await SessionService.revokeAllUserSessions(userId);
 }
 ```
 
-### 📡 Eventos WebSocket
+### 📡 WebSocket Events
 
-Las constantes de eventos se encuentran en [src/constants/constants.ts](src/constants/constants.ts):
+The event constants are defined in [src/constants/constants.ts](src/constants/constants.ts):
 
-| Evento            | Razón                  | Descripción                                     |
+| Event             | Reason                 | Description                                     |
 | ----------------- | ---------------------- | ----------------------------------------------- |
-| `session_revoked` | `SESSION_REVOKED`      | Una sesión específica fue revocada              |
-| `session_revoked` | `ALL_SESSIONS_REVOKED` | Todas las sesiones del usuario fueron revocadas |
+| `session_revoked` | `SESSION_REVOKED`      | A specific session was revoked                  |
+| `session_revoked` | `ALL_SESSIONS_REVOKED` | All sessions for the user were revoked          |
 
-**Integración Cliente:**
-El cliente debe escuchar estos eventos y:
+**Client Integration:**
+The client must listen for these events and:
 
-1. Desconectarse del socket
-2. Limpiar tokens de almacenamiento local
-3. Redirigir al usuario a la página de login
+1. Disconnect from the socket
+2. Clear tokens from local storage
+3. Redirect the user to the login page
 
-### 🧹 Limpieza Automática
+### 🧹 Automatic Cleanup
 
-El servicio `SessionCleanupService` ejecuta cada **60 minutos** y:
+The `SessionCleanupService` runs every **60 minutes** and:
 
-1. Marca sesiones expiradas como revocadas
-2. Elimina permanentemente sesiones revocadas con más de 30 días
+1. Marks expired sessions as revoked
+2. Permanently deletes revoked sessions older than 30 days
 
-**Configuración:** [src/constants/constants.ts](src/constants/constants.ts)
+**Configuration:** [src/constants/constants.ts](src/constants/constants.ts)
 
 ```typescript
 SESSION_CLEANUP_CONFIG = {
@@ -262,9 +262,9 @@ SESSION_CLEANUP_CONFIG = {
 
 ---
 
-## 📦 Instalación del Proyecto
+## 📦 Project Installation
 
-Instala todas las dependencias:
+Install all dependencies:
 
 ```bash
 npm install
@@ -272,21 +272,21 @@ npm install
 
 ---
 
-## 📊 Inicialización de Prisma
+## 📊 Prisma Initialization
 
-### 1️⃣ Generar el cliente de Prisma
+### 1️⃣ Generate the Prisma client
 
 ```bash
 npx prisma generate
 ```
 
-### 2️⃣ Ejecutar migraciones
+### 2️⃣ Run migrations
 
 ```bash
 npx prisma migrate dev
 ```
 
-### 3️⃣ Ejecutar los seeds
+### 3️⃣ Run the seeds
 
 ```bash
 npx prisma db seed
@@ -294,21 +294,21 @@ npx prisma db seed
 
 ---
 
-## 🏃 Ejecución del Proyecto
+## 🏃 Running the Project
 
-### 🔧 Modo Desarrollo
+### 🔧 Development Mode
 
 ```bash
 npm run dev
 ```
 
-### 🏗️ Compilación a Producción
+### 🏗️ Production Build
 
 ```bash
 npm run build
 ```
 
-### ▶️ Modo Producción
+### ▶️ Production Mode
 
 ```bash
 npm run start
@@ -316,68 +316,68 @@ npm run start
 
 ---
 
-## 🧪 Scripts Disponibles
+## 🧪 Available Scripts
 
-| Script             | Descripción                               |
-| ------------------ | ----------------------------------------- |
-| `npm run dev`      | Ejecuta el servidor en modo desarrollo    |
-| `npm run build`    | Compila el proyecto a JavaScript          |
-| `npm run start`    | Ejecuta el backend en producción          |
-| `npm run docs`     | Genera la documentación Swagger de la API |
-| `npm run lint`     | Analiza errores con ESLint                |
-| `npm run lint:fix` | Corrige errores automáticamente           |
-| `npm run format`   | Formatea el código con Prettier           |
+| Script             | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `npm run dev`      | Runs the server in development mode            |
+| `npm run build`    | Compiles the project to JavaScript             |
+| `npm run start`    | Runs the backend in production mode            |
+| `npm run docs`     | Generates the Swagger API documentation        |
+| `npm run lint`     | Analyzes code with ESLint                      |
+| `npm run lint:fix` | Fixes lint issues automatically                |
+| `npm run format`   | Formats the code with Prettier                 |
 
 ---
 
-## � Documentación de la API
+## 📚 API Documentation
 
-El proyecto incluye documentación automática generada con **Swagger**.
+The project includes automatic documentation generated with **Swagger**.
 
-### Generar documentación
+### Generate documentation
 
 ```bash
 npm run docs
 ```
 
-### Ver documentación interactiva
+### View interactive documentation
 
-Inicia el servidor y visita:
+Start the server and visit:
 
 ```
 http://localhost:3005/api-docs
 ```
 
-La documentación se genera automáticamente al ejecutar `npm run dev` o `npm run build`.
+The documentation is generated automatically when running `npm run dev` or `npm run build`.
 
-### Producción: restricción de Swagger/OpenAPI
+### Production: Swagger/OpenAPI restriction
 
-En `NODE_ENV=production` la ruta de docs se protege para evitar la **enumeración de endpoints**:
+In `NODE_ENV=production`, the docs route is protected to avoid **endpoint enumeration**:
 
 - UI: `/api-docs`
 - JSON: `/api-docs/v1/openapi.json`
 
-Configurar estas variables de entorno en producción:
+Set these environment variables in production:
 
 ```env
-# Por defecto se protege en producción (true). Para desactivar (no recomendado):
+# Protected by default in production (true). Disable only if absolutely necessary:
 SWAGGER_DOCS_PROTECT=true
 
-# Credenciales Basic Auth obligatorias cuando SWAGGER_DOCS_PROTECT=true
+# Required Basic Auth credentials when SWAGGER_DOCS_PROTECT=true
 SWAGGER_DOCS_BASIC_USER=admin_docs
-SWAGGER_DOCS_BASIC_PASS=CAMBIAR_EN_PRODUCCION
+SWAGGER_DOCS_BASIC_PASS=CHANGE_IN_PRODUCTION
 
-# Opcional para una IP en especifico: lista separada por comas (IPs exactas o CIDR IPv4)
+# Optional: restrict to a specific IP address or CIDR range
 SWAGGER_DOCS_ALLOWED_IPS=127.0.0.1,10.0.0.0/8
 ```
 
 ---
 
-## �📊 Base de Datos
+## 📊 Database
 
-El sistema utiliza una base de datos PostgreSQL administrada con Prisma ORM.
+The system uses a PostgreSQL database managed with Prisma ORM.
 
-**Modelos principales:**
+**Main models:**
 
 - `users`
 - `roles`
@@ -388,36 +388,36 @@ El sistema utiliza una base de datos PostgreSQL administrada con Prisma ORM.
 - `user_nodes`
 - `user_roles`
 
-Incluye auditoría completa de las acciones de usuarios y administradores.
+It includes full auditing of user and administrator actions.
 
 ---
 
-## 🔒 Seguridad
+## 🔒 Security
 
-- Encriptación de contraseñas con bcrypt
-- Autenticación con JWT
-- Control de roles y permisos
-- Registro de auditorías del sistema
-
----
-
-## 📬 Envío de Correos
-
-Integración mediante Nodemailer para:
-
-- Notificaciones del sistema
-- Activación de usuarios
-- Recuperación de credenciales (en desarrollo)
+- Password hashing with bcrypt
+- Authentication with JWT
+- Role and permission control
+- System audit logging
 
 ---
 
-## 🧹 Calidad de Código
+## 📬 Email Delivery
 
-Este proyecto utiliza:
+Integration with Nodemailer for:
 
-- **ESLint v9** para validación de código
-- **Prettier** para formateo automático
-- Configuración compatible con TypeScript y Prisma
+- System notifications
+- User activation
+- Credential recovery (in development)
+
+---
+
+## 🧹 Code Quality
+
+This project uses:
+
+- **ESLint v9** for code validation
+- **Prettier** for automatic formatting
+- Configuration compatible with TypeScript and Prisma
 
 **Flujo recomendado:**
 

@@ -1,28 +1,28 @@
-# Imágenes del proyecto VinApp
+# VinApp Project Images
 
-Estas imágenes están preparadas para verse directamente en GitHub.
+These images are ready to be viewed directly on GitHub.
 
-## Arquitectura general
+## General architecture
 
-![Arquitectura general](./Arquitectura.png)
+![General architecture](./Arquitectura.png)
 
-## Registro
+## Registration
 
-![Etapa 1 - Registro](./Etapa1_Registro.png)
+![Stage 1 - Registration](./Etapa1_Registro.png)
 
-## Aprobación
+## Approval
 
-![Etapa 2 - Aprobación](./Etapa2_Aprobacion.png)
+![Stage 2 - Approval](./Etapa2_Aprobacion.png)
 
-## Funcionalidades
+## Functionalities
 
-![Funcionalidades](./Funcionalidades.png)
+![Functionalities](./Funcionalidades.png)
 
-## Sistema de monitoreo IoT
+## IoT monitoring system
 
 ![IoT Monitoring and Management System](./IoT%20Monitoring%20and%20Management%20System.jpeg)
 
-## Diagramas workflow / flujos
+## Workflow diagrams
 
 ![Workflow 1](./mermaid-diagram-2026-07-23-155359.png)
 
