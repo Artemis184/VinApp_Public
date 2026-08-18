@@ -1,0 +1,38 @@
+<!-- HEADER -->
+<app-main-header
+  title="Alarmas asignadas"
+  [showMenu]="true"
+  [showUserMenu]="true"
+></app-main-header>
+
+<!-- CONTENIDO -->
+<ion-content class="ion-padding">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="circles" color="primary"></ion-spinner>
+    <p>Cargando nodos asignados...</p>
+  </div>
+
+  <!-- Error Message -->
+  <p *ngIf="!isLoading && errorMessage" class="error-message">
+    {{ errorMessage }}
+  </p>
+
+  <!-- Alarmas -->
+  <app-alarm-switch
+    *ngIf="!isLoading && alarmasAsignadas.length"
+    [alarmas]="alarmasAsignadas"
+    (alarmToggle)="toggleAlarma($event)"
+  ></app-alarm-switch>
+</ion-content>

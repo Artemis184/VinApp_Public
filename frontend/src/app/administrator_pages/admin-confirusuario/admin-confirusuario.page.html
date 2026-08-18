@@ -1,0 +1,80 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>
+      Antes de guardar.... <ion-icon name="checkbox-outline"></ion-icon>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-content>
+      <h1>Corroborar los siguientes datos:</h1>
+
+      <h2>{{ usuarioOriginal.full_name ?? 'Sin nombre' }}</h2>
+
+      <ion-badge [color]="getEstadoUsuarioColor(usuarioEditado.status)">
+        {{ getEstadoTraducido(usuarioEditado.status) }}
+      </ion-badge>
+
+      <hr />
+
+      <div *ngIf="!huboCambios()" style="text-align: center; margin: 20px 0">
+        <ion-icon
+          name="information-circle-outline"
+          style="font-size: 3rem; color: var(--ion-color-medium)"
+        ></ion-icon>
+        <p style="color: var(--ion-color-medium)">
+          No se han detectado cambios en la información.
+        </p>
+      </div>
+
+      <div style="margin-top: 10px" class="campo" *ngFor="let campo of campos">
+        <ng-container *ngIf="cambio(campo)">
+          <p><b>{{ campo | uppercase }}</b></p>
+
+          <p>
+            Antes:
+            <span>{{ usuarioOriginal[campo] ?? '---' }}</span>
+          </p>
+
+          <p [class.cambiado]="cambio(campo)">
+            Después:
+            <span style="color: var(--ion-color-success); font-weight: bold">
+              {{ usuarioEditado[campo] ?? '---' }}
+            </span>
+          </p>
+        </ng-container>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button
+    expand="block"
+    color="medium"
+    (click)="cancelar()"
+    [disabled]="enviandoDatos"
+  >
+    <ion-icon name="close-circle" slot="start"></ion-icon>
+    Cancelar
+  </ion-button>
+
+  <ion-button
+    expand="block"
+    color="success"
+    (click)="confirmar()"
+    [disabled]="!huboCambios() || enviandoDatos"
+  >
+    <ion-icon
+      name="checkmark-circle"
+      slot="start"
+      *ngIf="!enviandoDatos"
+    ></ion-icon>
+    <ion-spinner *ngIf="enviandoDatos" name="crescent"></ion-spinner>
+
+    <span>
+      {{ enviandoDatos ? 'Guardando cambios...' : (huboCambios() ? 'Confirmar
+      Cambios' : 'Sin cambios que guardar') }}
+    </span>
+  </ion-button>
+</ion-content>

@@ -1,0 +1,33 @@
+<div *ngIf="loading" class="ion-text-center ion-padding">
+  <ion-spinner name="crescent"></ion-spinner>
+</div>
+
+<div *ngIf="errorMessage" class="ion-text-center ion-padding">
+  <ion-text color="danger"
+    ><p>{{ errorMessage }}</p></ion-text
+  >
+</div>
+
+<ion-list *ngIf="!loading && !errorMessage">
+  <ion-item *ngFor="let nodo of nodos">
+    <ion-label>
+      <h2>{{ nodo.name }}</h2>
+      <p style="font-size: 0.8rem; color: var(--ion-color-medium)">
+        {{ nodo.description }}
+      </p>
+    </ion-label>
+
+    <ion-checkbox
+      slot="end"
+      [checked]="isChecked(nodo.id)"
+      (ionChange)="toggleSelection(nodo.id)"
+    ></ion-checkbox>
+  </ion-item>
+</ion-list>
+
+<div
+  *ngIf="!loading && nodos.length === 0 && !errorMessage"
+  class="ion-text-center ion-padding"
+>
+  <p>No hay alarmas habilitadas.</p>
+</div>

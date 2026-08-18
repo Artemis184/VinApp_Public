@@ -1,0 +1,6 @@
+# Ignore files outside src/
+!src/
+node_modules/
+www/
+*.log
+.DS_Store

@@ -1,0 +1,192 @@
+/* ---------- BOTONES INFERIORES (ACTUALIZADO) ---------- */
+.button-row {
+  display: flex;
+  gap: 12px;
+  margin: 20px auto;
+  padding: 0 10px;
+  max-width: 500px; // Ajusta según el ancho de tu app
+}
+
+.rounded-button {
+  flex: 1; // Ambos ocupan el mismo ancho
+  --border-radius: 25px; // Bordes muy redondeados para mayor estética
+  height: 48px; // Un poco más altos para que sean fáciles de presionar
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0; // Quitamos márgenes individuales
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Sombra suave
+}
+
+/* Spinner dentro del botón */
+ion-spinner {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+/* ---------- CARD INFO ---------- */
+ion-card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* ---------- FAB ---------- */
+ion-fab-button {
+  --border-radius: 15px; // FAB cuadrado redondeado (look moderno)
+  width: 52px;
+  height: 52px;
+}
+.user-detail-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  ion-card-header {
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    ion-card-title {
+      font-weight: 800;
+      color: var(--ion-color-primary);
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .info-list {
+    background: transparent;
+    padding: 8px 0;
+
+    ion-item {
+      --padding-start: 16px;
+      --inner-padding-end: 16px;
+      --min-height: 55px;
+
+      ion-icon {
+        font-size: 20px;
+        margin-bottom: 0;
+      }
+
+      h3 {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--ion-color-medium);
+        margin-bottom: 2px;
+        font-weight: 600;
+      }
+
+      p {
+        font-size: 15px;
+        color: var(--ion-color-dark);
+        font-weight: 500;
+      }
+    }
+  }
+  /* ---------- ITEMS PERSONALIZADOS ---------- */
+  .styled-item {
+    --background: #ffffff;
+    margin: 0 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Bordes redondeados tipo card */
+  .rounded-item {
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* Separación vertical */
+  .margin-top {
+    margin-top: 14px;
+  }
+}
+/* Contenedor del FAB */
+.fab-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Globo de texto con mejor visibilidad */
+.fab-hint {
+  /* Fondo oscuro sólido o degradado para asegurar contraste */
+  background: linear-gradient(145deg, #222428, #33363b);
+  color: #ffffff; // Texto blanco puro
+
+  padding: 8px 14px;
+  border-radius: 20px; // Bordes más redondeados tipo pastilla
+  font-size: 13px;
+  font-weight: 600; // Un poco más de grosor
+  margin-bottom: 10px;
+
+  /* Borde sutil para separar del fondo de la app */
+  border: 1.5px solid var(--ion-color-primary);
+
+  white-space: nowrap;
+  pointer-events: none;
+
+  /* Sombra pronunciada para dar profundidad */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+
+  /* Animación de 5 segundos */
+  animation: fadePulse 5s infinite;
+  z-index: 10;
+}
+
+/* Flecha pequeña debajo del texto (opcional, da estilo) */
+.fab-hint::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--ion-color-primary);
+}
+
+@keyframes fadePulse {
+  0%,
+  15% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  25%,
+  75% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+}
+
+ion-item.select-verde {
+  --highlight-color-focused: var(--ion-color-success);
+
+  ion-select.select-verde {
+    color: var(--ion-color-success) !important;
+    font-weight: 600;
+
+    &::part(icon) {
+      color: var(--ion-color-success);
+    }
+  }
+}
+
+// Rojo (SUSPENDED)
+ion-item.select-rojo {
+  --highlight-color-focused: var(--ion-color-danger);
+
+  ion-select.select-rojo {
+    color: var(--ion-color-danger) !important;
+    font-weight: 600;
+
+    &::part(icon) {
+      color: var(--ion-color-danger);
+    }
+  }
+}

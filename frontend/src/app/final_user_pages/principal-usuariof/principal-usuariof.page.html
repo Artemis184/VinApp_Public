@@ -1,0 +1,38 @@
+<app-main-header
+  title="Bienvenido"
+  [showMenu]="false"
+  [showUserMenu]="true"
+></app-main-header>
+
+<ion-content>
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="center-wrapper">
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="circles" color="primary"></ion-spinner>
+      <p>Cargando nodos asignados...</p>
+    </div>
+
+    <!-- Error Message -->
+    <p *ngIf="!isLoading && errorMessage" class="error-message">
+      {{ errorMessage }}
+    </p>
+
+    <!-- Alarmas -->
+    <app-alarm-switch
+      *ngIf="!isLoading && alarmasUsuario.length"
+      [alarmas]="alarmasUsuario"
+      (alarmToggle)="toggleAlarma($event)"
+    ></app-alarm-switch>
+  </div>
+</ion-content>

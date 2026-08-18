@@ -1,0 +1,289 @@
+<app-admin-back-header
+  title="Auditoría de Admins"
+  [showUserMenu]="true"
+  defaultHref="/administrator/principal-administrador"
+></app-admin-back-header>
+
+<ion-content color="light">
+  <ion-list lines="none" class="ion-padding">
+    <div
+      class="audit-card"
+      *ngFor="let a of auditoriaFiltrada"
+      (click)="abrirModalDetalle(a)"
+      button
+    >
+      <div class="card-info">
+        <div class="card-header-row">
+          <span class="card-title">{{ a.accionTraducida }}</span>
+        </div>
+        <p class="admin-name">{{ a.adminNombre }}</p>
+
+        <p class="dynamic-summary" *ngIf="a.resumenDinamico">
+          {{ a.resumenDinamico }}
+        </p>
+
+        <p class="admin-email">{{ a.adminCorreo }}</p>
+        <p class="event-date">{{ a.fechaTexto }}</p>
+      </div>
+
+      <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+
+      <div
+        class="card-color-bar"
+        [ngClass]="obtenerColorEstado(a.accion)"
+      ></div>
+    </div>
+
+    <div
+      *ngIf="auditoriaFiltrada.length === 0"
+      class="empty-state ion-text-center ion-padding"
+    >
+      <ion-icon
+        name="search-outline"
+        style="font-size: 48px; color: var(--ion-color-medium)"
+      ></ion-icon>
+      <p>No se encontraron registros.</p>
+
+      <ion-button
+        fill="outline"
+        color="danger"
+        (click)="limpiarTodo()"
+        style="margin-top: 10px"
+      >
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        LIMPIAR FILTROS
+      </ion-button>
+    </div>
+  </ion-list>
+
+  <!-- 👇 BOTÓN LIMPIAR FILTROS -->
+  <div class="ion-padding" *ngIf="filtrosActivos">
+    <ion-button
+      expand="block"
+      color="danger"
+      fill="outline"
+      (click)="limpiarTodo()"
+    >
+      <ion-icon name="trash-outline" slot="start"></ion-icon>
+      Limpiar filtros
+    </ion-button>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="custom-fab">
+    <ion-fab-button class="fab-main">
+      <ion-icon name="funnel"></ion-icon>
+    </ion-fab-button>
+
+    <ion-fab-list side="top">
+      <div class="fab-label-row" *ngIf="filtrosActivos" (click)="limpiarTodo()">
+        <div class="label-text">Limpiar Filtros</div>
+        <ion-fab-button size="small" color="danger" class="fab-sub">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-fab-button>
+      </div>
+
+      <div class="fab-label-row" (click)="abrirModalFechas()">
+        <div class="label-text">Filtrar por fechas</div>
+        <ion-fab-button size="small" class="fab-sub">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </ion-fab-button>
+      </div>
+
+      <div class="fab-label-row" (click)="abrirModalAlarma()">
+        <div class="label-text">Listar por Alarma</div>
+        <ion-fab-button size="small" class="fab-sub">
+          <ion-icon name="list-outline"></ion-icon>
+        </ion-fab-button>
+      </div>
+
+      <div class="fab-label-row" (click)="abrirModalAdmin()">
+        <div class="label-text">Listar por Admin</div>
+        <ion-fab-button size="small" class="fab-sub">
+          <ion-icon name="person-outline"></ion-icon>
+        </ion-fab-button>
+      </div>
+    </ion-fab-list>
+  </ion-fab>
+  <ion-modal
+    [isOpen]="modalDetalleOpen"
+    (didDismiss)="cerrarModalDetalle()"
+    [initialBreakpoint]="1"
+    [breakpoints]="[0, 1]"
+    handle="true"
+  >
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar>
+          <ion-title>Detalle de Acción</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalDetalle()" style="font-weight: 700"
+              >CERRAR</ion-button
+            >
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding modal-detail-content">
+        <div class="detail-header" *ngIf="itemSeleccionado">
+          <h2 [ngClass]="obtenerClaseTexto(itemSeleccionado.accion)">
+            {{ itemSeleccionado.accionTraducida }}
+          </h2>
+          <p class="detail-admin">{{ itemSeleccionado.adminNombre }}</p>
+          <small class="detail-date">{{ itemSeleccionado.fechaTexto }}</small>
+        </div>
+
+        <div class="metadata-list" *ngIf="itemSeleccionado">
+          <div class="meta-item" *ngIf="itemSeleccionado.resumenDinamico">
+            <span class="meta-label">Observaciones:</span>
+            <span class="meta-value dynamic-note">
+              {{ itemSeleccionado.resumenDinamico }}
+            </span>
+          </div>
+
+          <hr
+            class="separator"
+            *ngIf="itemSeleccionado.resumenDinamico && itemSeleccionado.metadataList?.length"
+          />
+
+          <div
+            class="meta-item"
+            *ngFor="let meta of itemSeleccionado.metadataList"
+          >
+            <span class="meta-label">{{ meta.key }}:</span>
+            <span class="meta-value">{{ meta.value }}</span>
+          </div>
+
+          <div
+            *ngIf="(!itemSeleccionado.metadataList || itemSeleccionado.metadataList.length === 0) && !itemSeleccionado.resumenDinamico"
+            class="ion-text-center ion-padding"
+          >
+            <ion-text color="medium">
+              <small>No hay detalles adicionales para esta acción.</small>
+            </ion-text>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    [isOpen]="modalFechasOpen"
+    (didDismiss)="cerrarModalFechas()"
+    [breakpoints]="[0, 0.95]"
+    [initialBreakpoint]="0.95"
+    [keepContentsMounted]="true"
+  >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Rango de Fecha</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalFechas()">CERRAR</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding date-modal-content">
+        <div class="date-section">
+          <h3><b>Fecha Inicio</b></h3>
+          <ion-datetime
+            presentation="date"
+            [(ngModel)]="fechaInicioISO"
+            locale="es-ES"
+          ></ion-datetime>
+        </div>
+
+        <div class="date-section">
+          <h3><b>Fecha Fin</b></h3>
+          <ion-datetime
+            presentation="date"
+            [(ngModel)]="fechaFinISO"
+            locale="es-ES"
+          ></ion-datetime>
+        </div>
+
+        <div class="modal-footer-buttons">
+          <ion-button fill="outline" (click)="limpiarFiltroFechas()"
+            >LIMPIAR</ion-button
+          >
+          <ion-button (click)="aplicarFiltroFechas()">APLICAR</ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="modalAlarmaOpen" (didDismiss)="cerrarModalAlarma()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Seleccionar Alarma</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalAlarma()">CERRAR</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list>
+          <ion-radio-group [(ngModel)]="alarmaSeleccionadaId">
+            <ion-item
+              button
+              (click)="alarmaSeleccionadaId = null; modoHistorialAlarmas = false; seleccionarAlarma()"
+            >
+              <ion-label color="primary"
+                ><b>Ver todas las Alarmas</b></ion-label
+              >
+              <ion-radio slot="end" [value]="null" mode="ios"></ion-radio>
+            </ion-item>
+
+            <ion-item
+              *ngFor="let al of alarmasFiltrables"
+              button
+              (click)="alarmaSeleccionadaId = al.id; modoHistorialAlarmas = true; seleccionarAlarma()"
+            >
+              <ion-label><h2>{{ al.nombre }}</h2></ion-label>
+              <ion-radio slot="end" [value]="al.id" mode="ios"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="modalAdminOpen" (didDismiss)="cerrarModalAdmin()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Seleccionar Admin</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalAdmin()">CERRAR</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list>
+          <ion-radio-group [(ngModel)]="adminSeleccionadoId">
+            <ion-item
+              button
+              (click)="adminSeleccionadoId = null; seleccionarAdmin()"
+            >
+              <ion-label><b>Ver Todos</b></ion-label>
+              <ion-radio slot="end" [value]="null" mode="ios"></ion-radio>
+            </ion-item>
+
+            <ion-item
+              *ngFor="let ad of adminsFiltrables"
+              button
+              (click)="adminSeleccionadoId = ad.id; seleccionarAdmin()"
+            >
+              <ion-label>
+                <h2>{{ ad.nombre }}</h2>
+                <p>{{ ad.correo }}</p>
+              </ion-label>
+              <ion-radio slot="end" [value]="ad.id" mode="ios"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

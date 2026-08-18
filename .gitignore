@@ -1,0 +1,27 @@
+.vscode/settings.json
+node_modules
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Secrets and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Local/generated files
+backend/ARDUINO_NODO_HIJO_TOKEN.ino
+backend/ARDUINO_NODO_1.ino
+backend/ARDUINO_NODO_2.ino
+backend/ARDUINO_NODO_3.ino
+backend/ARDUINO_NODO_4.ino
+backend/ARDUINO_NODO_5.ino
+backend/uploads/
+frontend/.env
+frontend/.env.*
+*.log
+*.sqlite
+*.sqlite3

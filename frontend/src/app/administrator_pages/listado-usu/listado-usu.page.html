@@ -1,0 +1,171 @@
+<app-admin-back-header
+  title="Detalle de Solicitud"
+  [showUserMenu]="true"
+  defaultHref="/administrator/principal-administrador"
+></app-admin-back-header>
+
+<ion-content class="ion-padding">
+  <!-- BANNER SOLO SI HAY ESTADO -->
+  <div
+    *ngIf="estadoSeleccionado"
+    class="estado-banner"
+    [ngClass]="{
+      aprobado: esAprobado,
+      rechazado: esRechazado
+    }"
+  >
+    <ion-icon
+      [name]="esAprobado ? 'checkmark-circle' : 'close-circle'"
+    ></ion-icon>
+
+    <span> {{ esAprobado ? 'USUARIO APROBADO' : 'USUARIO RECHAZADO' }} </span>
+  </div>
+
+  <!-- CARD USUARIO -->
+  <div class="card" *ngIf="usuario">
+    <h2>{{ usuario.nombre }}</h2>
+    <p><b>Teléfono:</b> {{ usuario.telefono }}</p>
+    <p><b>Correo:</b> {{ usuario.correo }}</p>
+    <p><b>Dirección:</b> {{ usuario.direccion }}</p>
+    <p><b>Referencia:</b> {{ usuario.referencia }}</p>
+  </div>
+
+  <!-- CARD ACCIONES -->
+  <div class="card acciones">
+    <h3>Estado de solicitud</h3>
+
+    <ion-item button detail="false" (click)="abrirEstado()">
+      <ion-label>Estado</ion-label>
+      <ion-select
+        #estadoSelect
+        [(ngModel)]="estadoSeleccionado"
+        (ngModelChange)="onEstadoChange($event)"
+        interface="alert"
+        placeholder="Seleccionar"
+      >
+        <ion-select-option value="APROBADO"> ✅ Aprobado </ion-select-option>
+
+        <ion-select-option value="RECHAZADO"> ❌ Rechazado </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ng-container *ngIf="esAprobado">
+      <h3>Alarmas</h3>
+
+      <app-node-selector
+        [selectedIds]="usuario.alarmasSeleccionadas || []"
+        (selectionChange)="actualizarSeleccion($event)"
+      ></app-node-selector>
+    </ng-container>
+  </div>
+
+  <!-- BOTONES -->
+  <div class="acciones">
+    <ion-button
+      expand="block"
+      [color]="
+        estadoSeleccionado
+          ? (esAprobado ? 'success' : 'danger')
+          : 'medium'
+      "
+      [disabled]="!esFormularioValido()"
+      (click)="abrirConfirmacion()"
+    >
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      Guardar
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      color="medium"
+      fill="outline"
+      (click)="cancelar()"
+    >
+      <ion-icon name="close-outline" slot="start"></ion-icon>
+      Cancelar
+    </ion-button>
+  </div>
+
+  <!-- MODAL CONFIRMACIÓN -->
+  <ion-modal
+    [isOpen]="modalConfirmacion"
+    (didDismiss)="cerrarConfirmacion()"
+    [cssClass]="
+      esAprobado ? 'modal-aprobado' :
+      esRechazado ? 'modal-rechazado' : ''
+    "
+  >
+    <ng-template>
+      <ion-header>
+        <ion-toolbar [color]="esAprobado ? 'success' : 'danger'">
+          <ion-title> {{ esAprobado ? 'Aprobación' : 'Rechazo' }} </ion-title>
+
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarConfirmacion()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div
+          class="estado-banner"
+          [ngClass]="{
+            aprobado: esAprobado,
+            rechazado: esRechazado
+          }"
+        >
+          <ion-icon
+            [name]="esAprobado ? 'checkmark-circle' : 'close-circle'"
+          ></ion-icon>
+
+          <span>
+            {{ esAprobado ? 'USUARIO APROBADO' : 'USUARIO RECHAZADO' }}
+          </span>
+        </div>
+
+        <h2>Antes de guardar, corrobora:</h2>
+        <p><b>Usuario:</b> {{ usuario.nombre }}</p>
+
+        <!-- ESTADO CON COLOR -->
+        <p>
+          <b>Estado:</b>
+          <span
+            class="estado-texto"
+            [ngClass]="{
+              aprobado: esAprobado,
+              rechazado: esRechazado
+            }"
+          >
+            {{ estadoSeleccionado }}
+          </span>
+        </p>
+        <ng-container *ngIf="esAprobado">
+          <p><b>Alarmas:</b></p>
+          <ul>
+            <li *ngFor="let id of usuario.alarmasSeleccionadas">
+              {{ nombreAlarma(id) }}
+            </li>
+          </ul>
+        </ng-container>
+
+        <ion-button
+          expand="block"
+          [color]="esAprobado ? 'success' : 'danger'"
+          (click)="guardar()"
+        >
+          Confirmar
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          (click)="cerrarConfirmacion()"
+        >
+          Volver
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

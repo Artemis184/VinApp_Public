@@ -1,0 +1,157 @@
+/* =========================
+   CENTRADO EN PANTALLA
+========================= */
+.center-wrapper {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* =========================
+   LOADING CONTAINER
+========================= */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 16px;
+
+  ion-spinner {
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+    margin: 0;
+  }
+}
+
+.error-message {
+  text-align: center;
+  color: #b00020;
+  padding: 20px;
+  font-size: 14px;
+}
+
+/* =========================
+   TARJETA
+========================= */
+.alarma-card {
+  width: 90%;
+  max-width: 420px;
+  border-radius: 20px;
+  text-align: center;
+  padding: 10px;
+}
+
+/* =========================
+   TEXTO
+========================= */
+.alarma-nombre {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.alarma-direccion {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+/* =========================
+   SWITCH (UNIFICADO CON ADMIN)
+========================= */
+.switch {
+  width: 270px;
+  height: 120px;
+  background: #464646;
+  border-radius: 80px;
+  position: relative;
+  cursor: pointer;
+  margin: 0 auto;
+  transition: background 0.3s ease;
+}
+
+/* SWITCH ENCENDIDO */
+.switch.on {
+  background: #19d638;
+}
+
+/* BOTÓN INTERNO */
+.knob {
+  width: 100px;
+  height: 100px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  transition: left 0.3s ease;
+}
+
+/* POSICIÓN ENCENDIDO */
+.switch.on .knob {
+  left: 160px;
+}
+
+.switch.loading {
+  pointer-events: none;
+}
+
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.spinner::after {
+  content: "";
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+  animation:
+    spin 0.9s linear infinite,
+    pulse 1.4s ease-in-out infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.switch.loading .knob {
+  opacity: 0.45;
+  filter: saturate(0.6);
+}
+
+.switch.loading:not(.on) .spinner::after {
+  border-top-color: #cfcfcf;
+}
+
+.switch.loading.on .spinner::after {
+  border-top-color: #ffffff;
+}

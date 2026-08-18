@@ -1,0 +1,66 @@
+.card-arrow {
+  position: absolute;
+  right: 20px;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--ion-color-step-400);
+}
+
+/* Estilos para la barra de filtros - EXACTAMENTE igual que admin-auditoria */
+.filter-toggle {
+  padding: 8px 12px;
+  background: var(--ion-background-color);
+  border-bottom: 1px solid var(--ion-color-step-150);
+}
+
+.filter-button {
+  --background: var(--ion-color-step-50);
+  --color: var(--ion-text-color);
+  --border-radius: 12px;
+  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --border-width: 0;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.filter-bar {
+  width: 100%;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+  background: var(--ion-background-color);
+  border-bottom: 1px solid var(--ion-color-step-200);
+
+  &.open {
+    max-height: 600px;
+  }
+
+  &.active {
+    background: var(--ion-color-step-100);
+  }
+}
+
+.filter-input-group {
+  padding: 1rem 1.5rem;
+
+  &:first-child {
+    padding-top: 1.5rem;
+  }
+
+  ion-input,
+  ion-select {
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --padding-top: 0.75rem;
+    --padding-bottom: 0.75rem;
+    --border-radius: 8px;
+    --background: var(--ion-item-background, #ffffff);
+  }
+}
+
+.danger-button {
+  --border-color: var(--ion-color-danger);
+  --color: var(--ion-color-danger);
+  --border-radius: 8px;
+  margin: 0 1.5rem 1.5rem 1.5rem;
+}

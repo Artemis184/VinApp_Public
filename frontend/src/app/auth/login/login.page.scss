@@ -1,0 +1,240 @@
+.custom-login-content {
+  --background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-wrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-top: 10vh;
+  text-align: center;
+}
+
+.login-title {
+  font-weight: 800;
+  font-size: 32px;
+  color: #1a1a1a;
+  margin-bottom: 40px;
+}
+
+.custom-input-container {
+  background-color: #ececec;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  padding: 5px 15px;
+
+  .custom-input {
+    --padding-start: 5px;
+    --placeholder-color: #9d9d9d;
+    --color: #333;
+    font-size: 16px;
+  }
+
+  .password-icon {
+    color: #9d9d9d;
+    font-size: 20px;
+    cursor: pointer;
+  }
+}
+
+.forgot-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 25px;
+
+  .forgot-btn {
+    background: #bae0ff;
+    border-radius: 8px;
+    border: none;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #444;
+  }
+}
+
+.main-login-btn {
+  --background: #ff8a50;
+  --background-activated: #e67a46;
+  --border-radius: 12px;
+  --box-shadow: none;
+  height: 55px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: none;
+  margin-top: 10px;
+}
+
+.error-text {
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  margin-bottom: 60px;
+
+  .legal-link {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--ion-color-primary);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .separator {
+    color: #999;
+    font-size: 10px;
+    user-select: none;
+  }
+}
+
+.register-footer {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+
+  .register-btn {
+    --background: #ece4f9;
+    --color: #4b4b4b;
+    --border-radius: 15px;
+    text-transform: none;
+    font-weight: 500;
+    width: 140px;
+  }
+}
+
+/* ============================= */
+/* 🌙 MODO OSCURO (CORRECCIÓN) */
+/* ============================= */
+
+@media (prefers-color-scheme: dark) {
+  .custom-login-content {
+    --background: #121212;
+  }
+
+  .login-title {
+    color: #ffffff;
+  }
+
+  .custom-input-container {
+    background-color: #1e1e1e;
+
+    .custom-input {
+      --color: #ffffff;
+      --placeholder-color: #aaaaaa;
+    }
+
+    .password-icon {
+      color: #aaaaaa;
+    }
+  }
+
+  .forgot-container .forgot-btn {
+    background: #2a3a4a;
+    color: #ffffff;
+  }
+
+  .register-footer .register-btn {
+    --background: #2c2c2c;
+    --color: #ffffff;
+  }
+
+  .legal-links {
+    .legal-link {
+      color: #aaa;
+
+      &:hover {
+        color: var(--ion-color-primary-tint);
+      }
+    }
+
+    .separator {
+      color: #666;
+    }
+  }
+}
+
+.google-login-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+  align-items: stretch;
+
+  //forzado del boton
+  #googleBtn {
+    > div {
+      border-radius: 50px !important;
+      overflow: hidden;
+    }
+
+    iframe {
+      border-radius: 50px !important;
+    }
+  }
+}
+
+.google-native-btn {
+  --background: #ffffff;
+  --background-activated: #f2f2f2;
+  --border-color: #dadce0;
+  --border-radius: 999px;
+  --border-width: 1px;
+  --color: #202124;
+  --box-shadow: none;
+  text-transform: none;
+  width: 100%;
+  min-height: 48px;
+  font-weight: 600;
+}
+
+.google-status {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+}
+
+.google-native-status {
+  text-align: center;
+}
+
+.google-retry-btn {
+  --border-radius: 999px;
+  text-transform: none;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .google-status {
+    color: #b9b9b9;
+  }
+
+  .google-native-btn {
+    --background: #ffffff;
+    --background-activated: #ececec;
+    --color: #202124;
+  }
+}

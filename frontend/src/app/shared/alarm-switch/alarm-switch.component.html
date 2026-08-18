@@ -1,0 +1,49 @@
+<ion-card
+  class="alarma-card"
+  *ngFor="let alarma of alarmas"
+  [class.node-offline]="alarma.isOnline === false"
+>
+  <ion-card-content>
+    <div class="alarma-top">
+      <div>
+        <div class="alarma-nombre">
+          <span
+            class="status-dot"
+            [class.online]="alarma.isOnline !== false"
+            [class.offline]="alarma.isOnline === false"
+          ></span>
+          {{ alarma.nombre }}
+        </div>
+        <div class="alarma-dir">{{ alarma.direccion }}</div>
+      </div>
+
+      <div
+        class="estado-text"
+        [class.on]="alarma.encendida"
+        [class.disabled]="alarma.isEnabled === false"
+        [class.offline]="alarma.isOnline === false"
+      >
+        {{
+          alarma.isEnabled === false
+            ? "DESHABILITADO"
+            : alarma.isOnline === false
+              ? "SIN SEÑAL"
+              : alarma.encendida
+                ? "ENCENDIDO"
+                : "APAGADO"
+        }}
+      </div>
+    </div>
+
+    <div
+      class="switch"
+      [class.on]="alarma.encendida"
+      [class.loading]="alarma.loading"
+      [class.disabled]="alarma.isOnline === false || alarma.isEnabled === false"
+      (click)="onToggle(alarma)"
+    >
+      <div class="knob"></div>
+      <div class="spinner" *ngIf="alarma.loading"></div>
+    </div>
+  </ion-card-content>
+</ion-card>

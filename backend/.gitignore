@@ -1,0 +1,19 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+/src/generated/prisma
+
+dist
+/src/generated/prisma
+
+/src/generated/prisma
+
+db.sql
+
+ARDUINO_MAESTRO_CON_REPORTES.ino
+ESP8266_ESCLAVO_CON_PING.ino
+ESP8266_MAESTRO_CON_PING.ino
+.vscode/
+.vscode/settings.json

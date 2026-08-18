@@ -1,0 +1,86 @@
+<ion-content class="ion-padding custom-dark-content">
+  <div class="recover-container">
+    <div class="header-row">
+      <ion-button fill="clear" (click)="goBack()" class="back-btn-blue">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <h2 class="title">Recuperar Cuenta</h2>
+    </div>
+
+    <div *ngIf="step === 1" class="fade-in">
+      <div class="custom-input-container">
+        <ion-input
+          type="email"
+          placeholder="Introduce tu correo"
+          [(ngModel)]="email"
+          class="custom-input"
+          label-placement="floating"
+        >
+        </ion-input>
+      </div>
+
+      <ion-button
+        expand="block"
+        class="orange-button"
+        (click)="sendCode()"
+        [disabled]="loading || recoveryService.getCooldown() > 0"
+      >
+        <span *ngIf="!loading && recoveryService.getCooldown() <= 0"
+          >Enviar código</span
+        >
+        <span *ngIf="loading">Enviando...</span>
+        <span *ngIf="!loading && recoveryService.getCooldown() > 0">
+          Reintentar en {{ recoveryService.getCooldown() }}s
+        </span>
+      </ion-button>
+    </div>
+
+    <div *ngIf="step === 2" class="fade-in">
+      <div class="info-box">
+        <p class="helper-text">Se ha enviado un código temporal al correo:</p>
+        <p class="masked-email">
+          <strong>
+            {{ (email && email.includes('@')) ?
+            (email.split('@')[0].substring(0, 2) + '*******@' +
+            email.split('@')[1]) : email }}
+          </strong>
+        </p>
+      </div>
+
+      <div class="custom-input-container">
+        <ion-input
+          type="tel"
+          inputmode="numeric"
+          placeholder="Código de 6 dígitos"
+          [(ngModel)]="inputCode"
+          (ionInput)="validateOnlyNumbers($event)"
+          maxlength="6"
+          class="custom-input"
+        >
+        </ion-input>
+      </div>
+      <ion-button
+        expand="block"
+        class="orange-button"
+        (click)="verifyCode()"
+        [disabled]="loading || !inputCode || inputCode.length < 6"
+      >
+        {{ loading ? 'Verificando...' : 'Verificar Código' }}
+      </ion-button>
+
+      <ion-button
+        fill="clear"
+        expand="block"
+        (click)="sendCode()"
+        class="resend-text"
+        [disabled]="loading || recoveryService.getCooldown() > 0"
+      >
+        {{ recoveryService.getCooldown() > 0 ? 'Reenviar en ' +
+        recoveryService.getCooldown() + 's' : '¿No recibiste el código?
+        Reenviar' }}
+      </ion-button>
+
+      <p class="timer-info">El código es válido por tiempo limitado.</p>
+    </div>
+  </div>
+</ion-content>

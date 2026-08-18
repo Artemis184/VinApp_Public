@@ -1,0 +1,100 @@
+.header ion-toolbar {
+  --background: #1a1a1a;
+}
+
+.icono-perfil {
+  font-size: 32px;
+  color: #6a4aa8;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+
+  h2,
+  h3 {
+    font-weight: 900;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin: 4px 0;
+    font-weight: 500;
+  }
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-select {
+  --padding-start: 16px;
+  cursor: pointer;
+}
+
+ion-select {
+  width: 100%;
+  max-width: 100%;
+}
+
+ion-modal {
+  --border-radius: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #1c1c1e;
+    color: white;
+  }
+}
+/* ===== MODAL ESTADOS ===== */
+
+.modal-aprobado {
+  --background: #f0fff4;
+}
+
+.modal-rechazado {
+  --background: #fff5f5;
+}
+
+/* Banner visual */
+.estado-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  font-weight: 600;
+
+  ion-icon {
+    font-size: 24px;
+  }
+
+  &.aprobado {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  &.rechazado {
+    background: #fee2e2;
+    color: #7f1d1d;
+  }
+}
+.estado-texto {
+  font-weight: 700;
+
+  &.aprobado {
+    color: #16a34a; // verde
+  }
+
+  &.rechazado {
+    color: #dc2626; // rojo
+  }
+}

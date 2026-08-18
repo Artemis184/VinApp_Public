@@ -1,0 +1,93 @@
+<ion-content class="ion-padding custom-login-content">
+  <div class="login-wrapper">
+    <h1 class="login-title">INICIAR SESIÓN</h1>
+
+    <div class="custom-input-container">
+      <ion-input
+        type="email"
+        placeholder="Ingrese su correo"
+        [(ngModel)]="email"
+        class="custom-input"
+      ></ion-input>
+    </div>
+
+    <div class="custom-input-container">
+      <ion-input
+        [type]="showPassword ? 'text' : 'password'"
+        placeholder="Contraseña"
+        [(ngModel)]="password"
+        class="custom-input"
+      ></ion-input>
+      <ion-icon
+        [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+        (click)="togglePassword()"
+        class="password-icon"
+      ></ion-icon>
+    </div>
+
+    <div class="forgot-container">
+      <button class="forgot-btn" (click)="goToRecover()">
+        Olvidé mi contraseña
+      </button>
+    </div>
+
+    <ion-button
+      expand="block"
+      class="main-login-btn"
+      [disabled]="loading"
+      (click)="login()"
+    >
+      {{ loading ? 'Ingresando...' : 'Log In' }}
+    </ion-button>
+
+    <div class="legal-links">
+      <button class="legal-link" (click)="goToPrivacyPolicy()">
+        Política de Privacidad
+      </button>
+      <span class="separator">•</span>
+      <button class="legal-link" (click)="goToTermsConditions()">
+        Términos y Condiciones
+      </button>
+    </div>
+
+    <div class="google-login-container">
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="google-native-btn"
+        [disabled]="loading"
+        (click)="handleGoogleNativeClick()"
+      >
+        <ion-icon name="logo-google" slot="start"></ion-icon>
+        Continuar con Google
+      </ion-button>
+
+      <p class="google-status google-native-status">
+        {{
+          isNativeApp
+            ? 'En la app, Google abre en el navegador del sistema.'
+            : !googleButtonReady && !googleButtonError
+              ? 'Cargando acceso con Google...'
+              : 'Usa el botón oficial de Google si aparece abajo.'
+        }}
+      </p>
+
+      <div id="googleBtn" *ngIf="!isNativeApp"></div>
+      <ion-button
+        *ngIf="!isNativeApp && googleButtonError"
+        expand="block"
+        fill="outline"
+        class="google-retry-btn"
+        (click)="retryGoogleButton()"
+      >
+        Reintentar Google
+      </ion-button>
+    </div>
+
+    <div class="register-footer">
+      <ion-button fill="clear" class="register-btn" (click)="goToRegister()">
+        Registrarse
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

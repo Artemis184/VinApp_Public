@@ -1,0 +1,46 @@
+.account-popup {
+  position: fixed; // 🔑 NO absolute
+  top: 56px; // altura real del toolbar
+  right: 12px;
+
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 8px 0;
+  min-width: 140px;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 9999; // 🔑 sobre TODO
+
+  animation: fadeSlide 0.18s ease-out;
+}
+
+.account-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.account-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.account-item.logout {
+  color: #ff6b6b;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

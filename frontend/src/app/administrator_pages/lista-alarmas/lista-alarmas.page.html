@@ -1,0 +1,69 @@
+<app-admin-back-header
+  title="Alarmas"
+  [showUserMenu]="true"
+  defaultHref="/administrator/principal-administrador"
+></app-admin-back-header>
+
+<ion-content class="ion-padding">
+  <!-- Indicador de carga -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner></ion-spinner>
+    <p>Cargando alarmas...</p>
+  </div>
+
+  <!-- Mensaje de error -->
+  <ion-item *ngIf="errorMessage && !isLoading" lines="none" color="danger">
+    <ion-label>{{ errorMessage }}</ion-label>
+  </ion-item>
+
+  <!-- Lista de alarmas -->
+  <ng-container *ngIf="!isLoading && alarmas.length > 0">
+    <ion-card
+      class="alarma-card"
+      [class.disabled]="!alarma.is_enabled"
+      *ngFor="let alarma of alarmas"
+    >
+      <!-- Imagen -->
+      <div class="img-box">
+        <ion-img class="alarma-img" [src]="alarma.installation_image"></ion-img>
+      </div>
+
+      <div class="body">
+        <div class="top">
+          <div>
+            <h2 class="title">{{ alarma.name }}</h2>
+            <p class="sub">{{ obtenerDireccion(alarma) }}</p>
+          </div>
+
+          <ion-button
+            class="btn-edit"
+            size="small"
+            fill="solid"
+            (click)="irAEditar(alarma.id)"
+          >
+            Editar
+          </ion-button>
+        </div>
+
+        <div class="meta">
+          <span class="meta-label">Código:</span>
+          <strong>{{ alarma.code }}</strong>
+        </div>
+
+        <div class="badges">
+          <ion-badge [color]="colorHabilitada(alarma)">
+            {{ estadoHabilitada(alarma) }}
+          </ion-badge>
+        </div>
+      </div>
+    </ion-card>
+  </ng-container>
+
+  <!-- Sin resultados -->
+  <ion-item
+    *ngIf="!isLoading && alarmas.length === 0 && !errorMessage"
+    lines="none"
+  >
+    <ion-label>No hay alarmas para mostrar</ion-label>
+  </ion-item>
+</ion-content>

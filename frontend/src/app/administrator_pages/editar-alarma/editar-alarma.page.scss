@@ -1,0 +1,48 @@
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ion-card-background, var(--ion-background-color));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.status-row {
+  padding: 12px 12px 0 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.img-wrap {
+  padding: 12px;
+}
+
+.img {
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ion-color-step-50);
+}
+
+.actions {
+  padding: 0 12px 12px 12px;
+}
+
+.save {
+  padding: 12px;
+}
+
+ion-item {
+  --background: transparent;
+}
+
+.hint {
+  margin: 10px 4px 0 4px;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}

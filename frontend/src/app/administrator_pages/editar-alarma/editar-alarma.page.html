@@ -1,0 +1,109 @@
+<app-admin-back-header
+  title="Editar alarma"
+  [showUserMenu]="true"
+  defaultHref="/administrator/lista-alarmas"
+></app-admin-back-header>
+
+<ion-content class="ion-padding" *ngIf="alarma">
+  <div class="container">
+    <ion-card class="card">
+      <!-- ESTADOS visibles -->
+      <div class="status-row">
+        <ion-chip [color]="colorHabilitada()">
+          <ion-label>{{ textoHabilitada() }}</ion-label>
+        </ion-chip>
+      </div>
+
+      <!-- IMAGEN -->
+      <div class="img-wrap" *ngIf="previewImg">
+        <ion-img class="img" [src]="previewImg"></ion-img>
+      </div>
+
+      <div class="actions">
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+          hidden
+          #fileInput
+        />
+        <ion-button expand="block" fill="outline" (click)="fileInput.click()">
+          Cambiar imagen
+        </ion-button>
+      </div>
+
+      <!-- FORM -->
+      <ion-item>
+        <ion-label position="stacked">Nombre</ion-label>
+        <ion-input
+          [(ngModel)]="alarma.name"
+          placeholder="Ej: ALARMA #1"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Código</ion-label>
+        <ion-input
+          [(ngModel)]="alarma.code"
+          placeholder="Ej: AL-001"
+          readonly
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Descripción</ion-label>
+        <ion-textarea
+          [(ngModel)]="alarma.description"
+          autoGrow="true"
+        ></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Ubicación</ion-label>
+        <ion-input [(ngModel)]="alarma.location"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">RF Address</ion-label>
+        <ion-input [(ngModel)]="alarma.rf_address"></ion-input>
+      </ion-item>
+
+      <!-- TOGGLES con texto -->
+      <ion-item>
+        <ion-label>Habilitada</ion-label>
+        <ion-toggle [(ngModel)]="alarma.is_enabled"></ion-toggle>
+        <ion-badge slot="end" [color]="colorHabilitada()"
+          >{{ textoHabilitada() }}</ion-badge
+        >
+      </ion-item>
+
+      <!-- BOTONES -->
+      <div class="save">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <ion-button
+                expand="block"
+                fill="outline"
+                color="medium"
+                (click)="cancelar()"
+              >
+                Cancelar
+              </ion-button>
+            </ion-col>
+            <ion-col size="6">
+              <ion-button
+                expand="block"
+                color="primary"
+                [disabled]="!puedeGuardar()"
+                (click)="guardar()"
+              >
+                Guardar
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-card>
+  </div>
+</ion-content>

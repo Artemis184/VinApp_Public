@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model audit_admin_actions {
+  id                                                BigInt            @id @default(autoincrement())
+  admin_id                                          String            @db.Uuid
+  affected_user_id                                  String?           @db.Uuid
+  node_id                                           Int?
+  action_type                                       admin_action_type
+  action_timestamp                                  DateTime          @default(now()) @db.Timestamp(6)
+  old_value                                         Json?
+  new_value                                         Json?
+  ip_address                                        String?           @db.VarChar(45)
+  users_audit_admin_actions_admin_idTousers         users             @relation("audit_admin_actions_admin_idTousers", fields: [admin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_audit_admin_actions_affected_user_idTousers users?            @relation("audit_admin_actions_affected_user_idTousers", fields: [affected_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  nodes                                             nodes?            @relation(fields: [node_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([admin_id], map: "idx_admin_audit_admin")
+  @@index([affected_user_id], map: "idx_admin_audit_user")
+  @@index([action_timestamp], map: "idx_admin_audit_timestamp")
+}
+
+model audit_user_actions {
+  id               BigInt           @id @default(autoincrement())
+  user_id          String           @db.Uuid
+  node_id          Int?
+  action_type      user_action_type
+  action_timestamp DateTime         @default(now()) @db.Timestamp(6)
+  metadata         Json?
+  ip_address       String?          @db.VarChar(45)
+  nodes            nodes?           @relation(fields: [node_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users            users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([node_id], map: "idx_user_audit_node")
+  @@index([user_id], map: "idx_user_audit_user")
+  @@index([action_timestamp], map: "idx_user_audit_timestamp")
+}
+
+model nodes {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(50)
+  code                String                @unique @db.VarChar(50)
+  description         String?
+  location            String?
+  communication_method node_communication_method @default(auto)
+  ip_address          String?               @db.VarChar(45)
+  rf_address          String?               @db.VarChar(50)
+  rf_slot             Int?
+  uses_repeater       Boolean               @default(false)   // ← AGREGAR ESTA LÍNEA
+  installation_image  String?
+  is_online           Boolean               @default(true)
+  is_enabled          Boolean               @default(true)
+  is_alarm_on         Boolean               @default(false)
+  last_failure_at     DateTime?             @db.Timestamp(6)
+  created_at          DateTime              @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?             @updatedAt @db.Timestamp(6)
+  audit_admin_actions audit_admin_actions[]
+  audit_user_actions  audit_user_actions[]
+  user_nodes          user_nodes[]
+}
+
+model notifications {
+  id         BigInt   @id @default(autoincrement())
+  user_id    String   @db.Uuid
+  type       String   @db.VarChar(50)
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_notifications_user")
+}
+
+model password_reset_codes {
+  id         BigInt   @id @default(autoincrement())
+  user_id    String   @db.Uuid
+  code_hash  String   @db.VarChar(255)
+  expires_at DateTime @db.Timestamp(6)
+  used_at    DateTime?
+  attempts   Int      @default(0)
+  is_revoked Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_prc_user")
+  @@index([expires_at], map: "idx_prc_expires")
+  @@index([code_hash], map: "idx_prc_code_hash")
+}
+
+model roles {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique @db.VarChar(50)
+  description String?
+  user_roles  user_roles[]
+  access      access[]
+}
+
+model menus {
+  id            Int       @id @default(autoincrement()) // id_menu
+  name          String    @db.VarChar(100)              // nombre_menu
+  icon          String?   @db.VarChar(100)              // icono_menu
+  path          String    @db.VarChar(255)              // ruta_menu
+  description   String?
+  parent_id     Int?                                     // para submenús (menús jerárquicos)
+  is_menu       Boolean   @default(true)                 // indica si es un menú navegable
+  is_active     Boolean   @default(true)
+  display_order Int?                                     // para ordenar en el frontend
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+
+  access        access[]                                // accesos que apuntan a este menú
+
+  @@index([parent_id], map: "idx_menu_parent")
+}
+
+model access {
+  id         Int      @id @default(autoincrement())      // id_acceso
+  role_id    Int                                       // fk_id_rol
+  menu_id    Int                                       // fk_id_menu
+
+  // Permisos escalables por menú
+  can_view   Boolean  @default(true)
+  can_create Boolean  @default(false)
+  can_update Boolean  @default(false)
+  can_delete Boolean  @default(false)
+
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime?@updatedAt @db.Timestamp(6)
+
+  // Relaciones
+  roles      roles    @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  menus      menus    @relation(fields: [menu_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([role_id, menu_id], map: "unique_role_menu_access") // Un menú por rol (sin duplicados)
+  @@index([role_id], map: "idx_access_role")
+  @@index([menu_id], map: "idx_access_menu")
+}
+
+model user_nodes {
+  id                                  Int       @id @default(autoincrement())
+  user_id                             String    @db.Uuid
+  node_id                             Int
+  assigned_by                         String    @db.Uuid
+  assigned_at                         DateTime  @default(now()) @db.Timestamp(6)
+  revoked_at                          DateTime? @db.Timestamp(6)
+  is_revoked                          Boolean   @default(false)
+  users_user_nodes_assigned_byTousers users     @relation("user_nodes_assigned_byTousers", fields: [assigned_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  nodes                               nodes     @relation(fields: [node_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_user_nodes_user_idTousers     users     @relation("user_nodes_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, node_id], map: "unique_active_node_assignment")
+}
+
+model user_roles {
+  user_id String @db.Uuid
+  role_id Int
+  roles   roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users   users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, role_id])
+}
+
+model users {
+  id                                                              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                                                           String                @unique @db.VarChar(255)
+  password_hash                                                   String?               @db.VarChar(255)
+  google_id                                                       String?               @db.VarChar(255)
+  full_name                                                       String?               @db.VarChar(255)
+  apodo                                                           String?               @db.VarChar(30)
+  age                                                             Int?
+  phone                                                           String?               @db.VarChar(20)
+  address                                                         String?
+  reference                                                       String?
+  profile_photo                                                   String?
+  status                                                          user_status           @default(PENDING)
+  is_master                                                       Boolean               @default(false)
+  created_at                                                      DateTime              @default(now()) @db.Timestamp(6)
+  updated_at                                                      DateTime?             @updatedAt @db.Timestamp(6)
+  last_login_at                                                   DateTime?             @db.Timestamp(6)
+  password_changed_at                                             DateTime?             @db.Timestamp(6)
+  audit_admin_actions_audit_admin_actions_admin_idTousers         audit_admin_actions[] @relation("audit_admin_actions_admin_idTousers")
+  audit_admin_actions_audit_admin_actions_affected_user_idTousers audit_admin_actions[] @relation("audit_admin_actions_affected_user_idTousers")
+  audit_user_actions                                              audit_user_actions[]
+  notifications                                                   notifications[]
+  user_nodes_user_nodes_assigned_byTousers                        user_nodes[]          @relation("user_nodes_assigned_byTousers")
+  user_nodes_user_nodes_user_idTousers                            user_nodes[]          @relation("user_nodes_user_idTousers")
+  user_roles                                                      user_roles[]
+  password_reset_codes                                            password_reset_codes[]
+  sessions                                                        sessions[]
+}
+
+model sessions {
+  id                   BigInt         @id @default(autoincrement())
+  user_id              String         @db.Uuid
+  users                users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  refresh_token_hash   String         @unique @db.VarChar(255)
+  
+  device_id            String         @db.VarChar(100)
+  device_info          Json?
+
+  is_revoked           Boolean        @default(false)
+  revoked_at           DateTime?      @db.Timestamp(6)
+  revoke_reason        revoke_reason?
+  
+  last_used_at         DateTime       @default(now()) @db.Timestamp(6)
+  created_at           DateTime       @default(now()) @db.Timestamp(6)
+  expires_at           DateTime       @db.Timestamp(6) // 6 meses
+
+  @@index([user_id, device_id], name: "idx_user_device")
+  @@index([user_id], map: "idx_sessions_user")
+  @@index([device_id], map: "idx_sessions_device")
+  @@index([expires_at], map: "idx_sessions_expires")
+}
+
+enum admin_action_type {
+  APPROVE_USER
+  REJECT_USER
+  SUSPEND_USER
+  CREATE_NODE
+  ASSIGN_NODE
+  REVOKE_NODE
+  UPDATE_USER_DATA
+  ENABLE_USER
+  UPDATE_NODE_DATA
+  SUSPEND_NODE
+  ENABLE_NODE
+  ASSIGN_ROLE
+  REVOKE_ROLE
+  SEND_NOTIFICATION
+  PASSWORD_RESET_REQUEST
+}
+
+enum user_action_type {
+  ALARM_ON
+  ALARM_OFF
+  LOGIN
+  LOGOUT
+  UPDATE_USER_DATA
+  PASSWORD_CHANGED
+  NOTIFICATION_RECEIVED
+}
+
+enum user_status {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum node_communication_method {
+  rf
+  wifi
+  auto
+}
+
+enum revoke_reason {
+  LOGOUT
+  COMPROMISED
+  EXPIRED
+  MANUAL
+  PASSWORD_CHANGED
+}

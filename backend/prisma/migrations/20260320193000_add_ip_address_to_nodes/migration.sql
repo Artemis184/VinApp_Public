@@ -1,0 +1,2 @@
+ALTER TABLE "nodes"
+ADD COLUMN IF NOT EXISTS "ip_address" VARCHAR(45);

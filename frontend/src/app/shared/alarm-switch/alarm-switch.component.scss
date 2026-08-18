@@ -1,0 +1,183 @@
+/* =========================
+   ALARMAS
+========================= */
+.alarma-card {
+  margin-bottom: 14px;
+}
+
+.alarma-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.alarma-nombre {
+  font-weight: 900;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Indicador de estado de conectividad */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background: #19d638;
+  box-shadow: 0 0 4px #19d638;
+}
+
+.status-dot.offline {
+  background: #d32f2f;
+  box-shadow: 0 0 4px #d32f2f;
+}
+
+.alarma-dir {
+  font-weight: 600;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.estado-text {
+  font-weight: 900;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent-purple);
+  color: #fff;
+  transition: background 0.35s ease;
+}
+
+.estado-text.on {
+  background: var(--accent-green);
+}
+
+.estado-text.disabled {
+  background: #757575;
+}
+/* =========================
+   SWITCH (UNIFICADO CON ADMIN)
+========================= */
+.switch {
+  width: 270px;
+  height: 120px;
+  background: #464646;
+  border-radius: 80px;
+  position: relative;
+  cursor: pointer;
+  margin: 0 auto;
+  transition: background 0.3s ease;
+}
+
+/* SWITCH ENCENDIDO */
+.switch.on {
+  background: #19d638;
+}
+
+/* BOTÓN INTERNO */
+.knob {
+  width: 100px;
+  height: 100px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  transition: left 0.3s ease;
+}
+
+/* POSICIÓN ENCENDIDO */
+.switch.on .knob {
+  left: 160px;
+}
+
+.switch.loading {
+  pointer-events: none;
+}
+
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.spinner::after {
+  content: "";
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+  animation:
+    spin 0.9s linear infinite,
+    pulse 1.4s ease-in-out infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.switch.loading .knob {
+  opacity: 0.45;
+  filter: saturate(0.6);
+}
+
+.switch.loading:not(.on) .spinner::after {
+  border-top-color: #cfcfcf;
+}
+
+.switch.loading.on .spinner::after {
+  border-top-color: #ffffff;
+}
+
+/* =========================
+   ESTADO SIN CONECTIVIDAD RF24
+========================= */
+.alarma-card.node-offline {
+  opacity: 0.7;
+  border: 1px solid #ff9800;
+}
+
+.estado-text.offline {
+  background: #ff9800;
+}
+
+.alarma-status {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.switch.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #757575 !important;
+}
+
+.switch.disabled .knob {
+  background: #bdbdbd;
+}

@@ -1,0 +1,28 @@
+<ion-menu
+  class="admin-side-menu"
+  side="start"
+  menuId="adminMenu"
+  contentId="main-content"
+  type="overlay"
+>
+  <ion-content class="menu-content">
+    <ion-list lines="none">
+      <ng-container *ngIf="menus.length; else loadingOrEmpty">
+        <ion-menu-toggle autoHide="true" *ngFor="let m of menus">
+          <ion-item button [routerLink]="m.path" routerDirection="root">
+            <ion-label>{{ m.name }}</ion-label>
+            <ion-badge *ngIf="m.path?.includes('listado-pendientes-acciones')"
+              >{{ solicitudesCount }}</ion-badge
+            >
+          </ion-item>
+        </ion-menu-toggle>
+      </ng-container>
+
+      <ng-template #loadingOrEmpty>
+        <ion-item>
+          <ion-label>No hay menús disponibles</ion-label>
+        </ion-item>
+      </ng-template>
+    </ion-list>
+  </ion-content>
+</ion-menu>

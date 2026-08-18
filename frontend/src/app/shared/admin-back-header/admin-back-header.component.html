@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <!-- ← ATRÁS -->
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="defaultHref"></ion-back-button>
+    </ion-buttons>
+
+    <!-- TÍTULO -->
+    <ion-title class="ion-text-center">
+      {{ title }}
+    </ion-title>
+
+    <!-- USER ICON -->
+    <ion-buttons slot="end" *ngIf="showUserMenu">
+      <ion-button (click)="toggleUserMenu()">
+        <ion-icon name="person-circle"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Popup de cuenta -->
+<div class="account-popup" *ngIf="userMenuOpen">
+  <button class="account-item" (click)="verCuenta()">
+    <span>Cuenta</span>
+  </button>
+
+  <button class="account-item logout" (click)="logout()">
+    <span>Logout</span>
+  </button>
+</div>

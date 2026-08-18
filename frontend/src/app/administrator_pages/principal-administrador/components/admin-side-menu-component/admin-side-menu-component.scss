@@ -1,0 +1,25 @@
+.admin-side-menu {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	--width: 320px;
+	padding-top: var(--ion-safe-area-top, 24px);
+}
+
+.admin-side-menu::part(container) {
+	top: 0;
+	height: 100%;
+	padding-top: var(--ion-safe-area-top, 24px);
+}
+
+.menu-content {
+	--padding-top: calc(var(--ion-safe-area-top, 24px) + 12px);
+	--padding-bottom: 12px;
+	--padding-start: 8px;
+	--padding-end: 8px;
+}
+
+ion-list {
+	padding-top: 0;
+}

@@ -1,0 +1,133 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Perfil</ion-title>
+    <ion-buttons slot="end" class="toolbar-actions">
+      <ion-button
+        class="toolbar-action-button save"
+        fill="outline"
+        [disabled]="cargando"
+        (click)="guardarCambios()"
+        aria-label="Guardar cambios"
+      >
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button
+        class="toolbar-action-button close"
+        fill="outline"
+        [disabled]="cargando"
+        (click)="cerrar()"
+        aria-label="Salir"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- AVATAR -->
+  <div class="avatar-container ion-text-center ion-margin-bottom">
+    <div class="avatar-wrapper">
+      <ion-avatar class="profile-avatar">
+        <img
+          [src]="avatarPreview"
+          (error)="onAvatarLoadError()"
+          alt="Foto de perfil del usuario"
+        />
+      </ion-avatar>
+
+      <ion-button
+        class="avatar-edit-button"
+        fill="outline"
+        type="button"
+        aria-label="Cambiar foto de perfil"
+        (click)="avatarInput.click()"
+      >
+        <ion-icon name="camera-outline"></ion-icon>
+      </ion-button>
+
+      <input
+        #avatarInput
+        class="hidden-avatar-input"
+        type="file"
+        [attr.accept]="avatarAccept"
+        (change)="onAvatarSelected($event)"
+      />
+    </div>
+  </div>
+
+  <ion-item class="readonly-item">
+    <ion-label position="stacked">Nombre</ion-label>
+    <ion-input
+      [value]="formulario.full_name || 'Sin Nombre'"
+      readonly="true"
+      name="username"
+      autocomplete="username"
+    ></ion-input>
+  </ion-item>
+
+  <ion-item class="editable-item">
+    <ion-label position="stacked">Apodo</ion-label>
+    <ion-input
+      [(ngModel)]="formulario.apodo"
+      placeholder="Sin Apodo"
+      fill="outline"
+      autocomplete="nickname"
+    ></ion-input>
+    <ion-icon
+      class="editable-input-icon"
+      slot="end"
+      name="create-outline"
+      aria-hidden="true"
+    ></ion-icon>
+  </ion-item>
+
+  <ion-item class="editable-item">
+    <ion-label position="stacked">Teléfono</ion-label>
+    <ion-input
+      type="tel"
+      [(ngModel)]="formulario.phone"
+      [maxlength]="phoneMaxLength"
+      placeholder="Sin Telefono"
+      fill="outline"
+      autocomplete="tel"
+    ></ion-input>
+    <ion-icon
+      class="editable-input-icon"
+      slot="end"
+      name="create-outline"
+      aria-hidden="true"
+    ></ion-icon>
+  </ion-item>
+
+  <ion-item class="readonly-item">
+    <ion-label position="stacked">Dirección</ion-label>
+    <ion-input
+      [value]="formulario.address || 'Sin Direccion'"
+      readonly="true"
+      autocomplete="off"
+    ></ion-input>
+  </ion-item>
+
+  <ion-item class="readonly-item">
+    <ion-label position="stacked">Referencia</ion-label>
+    <ion-input
+      [value]="formulario.reference || 'Sin Referencia'"
+      readonly="true"
+      autocomplete="off"
+    ></ion-input>
+  </ion-item>
+
+  <!-- PASSWORD EN MODAL -->
+  <ng-container *ngIf="!esGoogle">
+    <ion-button
+      expand="block"
+      fill="outline"
+      class="password-change-button"
+      (click)="abrirModalPassword()"
+    >
+      Cambiar contraseña
+    </ion-button>
+  </ng-container>
+</ion-content>

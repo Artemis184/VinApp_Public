@@ -1,0 +1,300 @@
+/* ============================= */
+/* CONTENEDOR GENERAL            */
+/* ============================= */
+
+.step-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+/* ============================= */
+/* ION-ITEM MODERNO              */
+/* ============================= */
+
+.custom-item {
+  --background: #ececec;
+  --padding-start: 16px;
+  --inner-padding-end: 10px;
+  --border-color: transparent;
+
+  border-radius: 14px;
+  margin-bottom: 4px;
+
+  position: relative;
+  overflow: hidden;
+
+  transition: all 0.3s ease;
+}
+
+/* ============================= */
+/* INPUT                         */
+/* ============================= */
+
+.custom-item ion-input {
+  font-size: 14px;
+}
+
+/* ============================= */
+/* LINEA VERDE INFERIOR          */
+/* ============================= */
+
+.custom-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0%;
+  height: 5px;
+  background-color: #2dd36f;
+  border-radius: 3px;
+  transform: translateX(-50%);
+  transition: width 0.35s ease;
+}
+
+/* ============================= */
+/* FOCUS / CON VALOR             */
+/* ============================= */
+
+.custom-item.item-has-focus::after,
+.custom-item.item-has-value::after {
+  width: 100%;
+}
+
+.custom-item.item-has-focus,
+.custom-item.item-has-value {
+  --background: #ffffff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  transform: translateY(-2px);
+}
+
+/* ============================= */
+/* BOTON OJO                     */
+/* ============================= */
+
+.password-item ion-button {
+  margin: 0;
+  height: 100%;
+}
+
+.password-item ion-icon {
+  font-size: 22px;
+  color: #777;
+}
+
+/* ============================= */
+/* FUERZA DE CONTRASEÑA          */
+/* ============================= */
+
+.strength-bar {
+  display: flex;
+  gap: 4px;
+  margin: 2px 0 0;
+}
+
+.strength-bar .bar {
+  flex: 1;
+  height: 3px;
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.strength-bar .bar.active {
+  background: #2dd36f;
+}
+
+.strength-text {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+/* ============================= */
+/* REQUISITOS DE CONTRASEÑA      */
+/* ============================= */
+
+.password-requirements {
+  margin: 6px 0;
+  padding: 8px 10px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.requirements-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+  font-size: 11px;
+  color: #999;
+  transition: color 0.3s ease;
+
+  ion-icon {
+    font-size: 14px;
+    color: #ccc;
+    transition: color 0.3s ease;
+  }
+
+  &.met {
+    color: #2dd36f;
+
+    ion-icon {
+      color: #2dd36f;
+    }
+  }
+}
+
+/* ============================= */
+/* LABEL CONFIRMAR CONTRASEÑA    */
+/* ============================= */
+
+.confirm-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  margin: 8px 0 4px 0;
+}
+
+/* ============================= */
+/* VALIDACIÓN DE COINCIDENCIA    */
+/* ============================= */
+
+.password-match {
+  margin-top: 4px;
+
+  p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    margin: 0;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+
+  .match-success {
+    color: #2dd36f;
+
+    ion-icon {
+      color: #2dd36f;
+    }
+  }
+
+  .match-error {
+    color: #eb445a;
+
+    ion-icon {
+      color: #eb445a;
+    }
+  }
+}
+
+/* ============================= */
+/* BOTONES                       */
+/* ============================= */
+
+ion-button {
+  margin-top: 8px;
+  border-radius: 14px;
+}
+
+/* ============================= */
+/* MODO OSCURO                   */
+/* ============================= */
+
+@media (prefers-color-scheme: dark) {
+  .register-main-btn {
+    --background: #ff9b6a;
+    --background-activated: #ff8a50;
+  }
+
+  .custom-item {
+    --background: #2a2a2a;
+  }
+
+  .custom-item.item-has-focus,
+  .custom-item.item-has-value {
+    --background: #3a3a3a;
+  }
+
+  .custom-item ion-input {
+    --color: #e0e0e0;
+    --placeholder-color: #999;
+  }
+
+  h2 {
+    color: #ffffff;
+  }
+
+  p {
+    color: #e0e0e0;
+  }
+
+  .strength-text {
+    color: #b0b0b0;
+  }
+
+  .password-item ion-icon {
+    color: #b0b0b0;
+  }
+
+  .password-requirements {
+    background: #2a2a2a;
+  }
+
+  .requirements-title {
+    color: #e0e0e0;
+  }
+
+  .requirement-item {
+    color: #999;
+
+    &.met {
+      color: #2dd36f;
+    }
+  }
+
+  .confirm-label {
+    color: #b0b0b0;
+  }
+}
+
+/* ============================= */
+/* BOTÓN PRINCIPAL REGISTRO      */
+/* ============================= */
+
+.register-main-btn {
+  --background: #ff8a50;
+  --background-activated: #e67a46;
+  --background-hover: #ff9b6a;
+
+  --border-radius: 14px;
+  --box-shadow: none;
+
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+
+  transition: transform 0.15s ease;
+}
+
+.register-main-btn:active {
+  transform: scale(0.97);
+}

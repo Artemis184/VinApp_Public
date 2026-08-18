@@ -1,0 +1,10 @@
+<ion-app>
+  <!-- MENÚ SOLO ADMIN -->
+  <app-admin-side-menu
+    *ngIf="isAdmin"
+    [userId]="currentUserId"
+  ></app-admin-side-menu>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <ion-router-outlet id="main-content"></ion-router-outlet>
+</ion-app>

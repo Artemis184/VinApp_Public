@@ -1,0 +1,39 @@
+<app-admin-back-header
+  title="Peticiones de Activación"
+  [showUserMenu]="true"
+  defaultHref="/administrator/principal-administrador"
+></app-admin-back-header>
+
+<ion-content>
+  <ion-list lines="none" class="ion-padding lista-transparente">
+    <ion-card
+      *ngFor="let u of usuarios"
+      class="peticion-card"
+      (click)="verDetalle(u)"
+    >
+      <div
+        class="barra-estado"
+        [ngClass]="{
+          'barra-pendiente': u.estado === 'PENDIENTE',
+          'barra-aprobado': u.estado === 'APROBADO',
+          'barra-rechazado': u.estado === 'RECHAZADO'
+        }"
+      ></div>
+
+      <div class="contenido-card">
+        <div class="info">
+          <h3 class="nombre-solicitante">{{ u.nombre }}</h3>
+          <p class="detalle-info">Teléfono: {{ u.telefono }}</p>
+          <p class="detalle-info">Correo: {{ u.correo }}</p>
+          <p class="detalle-info">Dirección: {{ u.direccion }}</p>
+          <p class="detalle-info">Referencia: {{ u.referencia }}</p>
+        </div>
+
+        <ion-icon
+          name="chevron-forward-outline"
+          class="icono-flecha"
+        ></ion-icon>
+      </div>
+    </ion-card>
+  </ion-list>
+</ion-content>

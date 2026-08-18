@@ -1,0 +1,7 @@
+{
+  "name": "VinApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

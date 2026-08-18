@@ -1,0 +1,19 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Seleccionar Alarmas</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="guardar()" strong="true">Listo</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <app-node-selector
+    [selectedIds]="idsActuales"
+    (selectionChange)="onSelectionChange($event)"
+  >
+  </app-node-selector>
+</ion-content>

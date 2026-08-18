@@ -1,0 +1,12 @@
+{
+  "name": "vinapp",
+  "version": "1.0.0",
+  "description": "VinApp Project",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix backend & npm run dev --prefix frontend",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+    "format": "npm run format --prefix backend && npm run format --prefix frontend"
+  }
+}

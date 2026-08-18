@@ -1,0 +1,95 @@
+.alarma-card {
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+
+  background: var(--ion-card-background, var(--ion-background-color));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+
+  &.disabled {
+    opacity: 0.65;
+
+    .title {
+      color: var(--ion-color-medium);
+    }
+
+    .alarma-img {
+      opacity: 0.7;
+    }
+  }
+}
+
+/* Imagen tipo banner */
+.img-box {
+  height: 160px;
+  background: var(--ion-color-step-50);
+}
+
+.alarma-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+/* Contenido */
+.body {
+  padding: 12px 12px 14px 12px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+.sub {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: var(--ion-color-medium);
+}
+
+.meta {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ion-text-color);
+}
+
+.meta-label {
+  color: var(--ion-color-medium);
+  margin-right: 6px;
+}
+
+/* Badges */
+.badges {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-edit {
+  height: 34px;
+  --border-radius: 999px;
+
+  --padding-start: 14px;
+  --padding-end: 14px;
+
+  --background: var(--ion-color-primary);
+  --background-hover: var(--ion-color-primary-shade);
+  --background-activated: var(--ion-color-primary-shade);
+
+  --color: var(--ion-color-primary-contrast);
+  --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+ion-item {
+  --background: transparent;
+}

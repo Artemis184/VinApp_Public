@@ -1,0 +1,122 @@
+<app-admin-back-header
+  title="Listado de Usuarios"
+  [showUserMenu]="true"
+  defaultHref="/administrator/principal-administrador"
+></app-admin-back-header>
+
+<ion-content fullscreen>
+  <!-- Botón de Filtros -->
+  <div class="filter-toggle">
+    <ion-button
+      expand="block"
+      size="small"
+      (click)="toggleFilterBar()"
+      class="filter-button"
+    >
+      <ion-icon name="funnel-outline" slot="start"></ion-icon>
+      {{ filterBarOpen ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
+    </ion-button>
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div
+    class="filter-bar"
+    [class.open]="filterBarOpen"
+    [class.active]="hayFiltrosActivos"
+  >
+    <!-- Búsqueda por nombre/apodo -->
+    <div class="filter-input-group">
+      <ion-input
+        placeholder="Buscar por nombre o apodo..."
+        [value]="filtroNombre"
+        (ionInput)="onNombreChange($event)"
+        clearInput
+      ></ion-input>
+    </div>
+
+    <!-- Búsqueda por email -->
+    <div class="filter-input-group">
+      <ion-input
+        placeholder="Buscar por email..."
+        [value]="filtroEmail"
+        (ionInput)="onEmailChange($event)"
+        clearInput
+      ></ion-input>
+    </div>
+
+    <!-- Select de estado con colores -->
+    <div class="filter-input-group">
+      <ion-select
+        [(ngModel)]="filtroEstado"
+        (ionChange)="onEstadoChange()"
+        placeholder="Filtrar por estado"
+        interface="popover"
+      >
+        @for (estado of USUARIO_ESTADOS; track estado.value) {
+        <ion-select-option [value]="estado.value">
+          {{ estado.label }}
+        </ion-select-option>
+        }
+      </ion-select>
+    </div>
+
+    <!-- Botón Limpiar -->
+    <ion-button
+      expand="block"
+      fill="outline"
+      (click)="limpiarFiltros()"
+      class="danger-button"
+    >
+      <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+      Limpiar
+    </ion-button>
+  </div>
+
+  <div class="ion-padding">
+    <!-- CARGANDO -->
+    <div class="cargando ion-text-center" *ngIf="cargando">
+      <ion-spinner></ion-spinner>
+      <ion-text color="medium">
+        <p>Cargando usuarios...</p>
+      </ion-text>
+    </div>
+
+    <!-- LISTA VACÍA -->
+    <ion-text
+      color="medium"
+      *ngIf="!cargando && usuariosFiltrados.length === 0"
+    >
+      <p class="ion-text-center">No existen usuarios registrados.</p>
+    </ion-text>
+
+    <!-- LISTADO DE USUARIOS -->
+    @for (usuario of usuariosFiltrados; track usuario.id) {
+    <ion-card class="usuario-card" button (click)="abrirUsuario(usuario)">
+      <ion-item lines="none">
+        <ion-label>
+          <h2>
+            {{ usuario.full_name || usuario.apodo || 'Sin nombre' }}
+            <span style="margin-left: 10px">
+              <ion-badge
+                slot="end"
+                [color]="getEstadoUsuarioColor(usuario.status)"
+              >
+                {{ getEstadoTraducido(usuario.status) }}
+              </ion-badge>
+            </span>
+          </h2>
+          <p>Teléfono: {{ usuario.phone || 'Sin teléfono' }}</p>
+          <p>Email: {{ usuario.email }}</p>
+          <p>Dirección: {{ usuario.address || 'Sin dirección' }}</p>
+          <p>Referencia: {{ usuario.reference || 'Sin referencia' }}</p>
+          <p>Edad: {{ usuario.age != null ? usuario.age : 'Sin edad' }}</p>
+        </ion-label>
+
+        <div class="card-arrow">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+      </ion-item>
+    </ion-card>
+    }
+  </div>
+</ion-content>

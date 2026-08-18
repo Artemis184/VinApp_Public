@@ -1,0 +1,186 @@
+<ion-content class="ion-padding">
+  <!-- ================= PASO 1 ================= -->
+  <div *ngIf="step === 1" class="step-container">
+    <h2>REGISTRAR CUENTA</h2>
+
+    <!-- CORREO -->
+    <ion-item class="custom-item">
+      <ion-input
+        placeholder="Correo electrónico"
+        type="email"
+        [(ngModel)]="email"
+      >
+      </ion-input>
+    </ion-item>
+
+    <!-- CONTRASEÑA -->
+    <ion-item class="custom-item password-item">
+      <ion-input
+        placeholder="Contraseña"
+        [type]="showPassword ? 'text' : 'password'"
+        [(ngModel)]="password"
+        (ionInput)="evaluatePassword()"
+      >
+      </ion-input>
+
+      <ion-button fill="clear" slot="end" (click)="showPasswordTemporarily()">
+        <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'">
+        </ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <!-- INDICADOR FUERZA -->
+    <div class="strength-bar">
+      <div class="bar" [class.active]="passwordStrength >= 1"></div>
+      <div class="bar" [class.active]="passwordStrength >= 2"></div>
+      <div class="bar" [class.active]="passwordStrength >= 3"></div>
+      <div class="bar" [class.active]="passwordStrength >= 4"></div>
+    </div>
+
+    <p class="strength-text">
+      Fuerza:
+      <span *ngIf="passwordStrength <= 1">Débil</span>
+      <span *ngIf="passwordStrength === 2">Media</span>
+      <span *ngIf="passwordStrength >= 3">Fuerte</span>
+    </p>
+
+    <!-- REQUISITOS DE CONTRASEÑA -->
+    <div class="password-requirements">
+      <p class="requirements-title">La contraseña debe contener:</p>
+      <div class="requirement-item" [class.met]="hasMinLength()">
+        <ion-icon
+          [name]="hasMinLength() ? 'checkmark-circle' : 'close-circle'"
+        ></ion-icon>
+        <span>Al menos 8 caracteres</span>
+      </div>
+      <div class="requirement-item" [class.met]="hasUpperCase()">
+        <ion-icon
+          [name]="hasUpperCase() ? 'checkmark-circle' : 'close-circle'"
+        ></ion-icon>
+        <span>Una letra mayúscula</span>
+      </div>
+      <div class="requirement-item" [class.met]="hasNumber()">
+        <ion-icon
+          [name]="hasNumber() ? 'checkmark-circle' : 'close-circle'"
+        ></ion-icon>
+        <span>Un número</span>
+      </div>
+      <div class="requirement-item" [class.met]="hasSpecialChar()">
+        <ion-icon
+          [name]="hasSpecialChar() ? 'checkmark-circle' : 'close-circle'"
+        ></ion-icon>
+        <span>Un carácter especial (!@#$%^&*)</span>
+      </div>
+    </div>
+
+    <!-- LABEL CONFIRMAR CONTRASEÑA -->
+    <p class="confirm-label">Vuelve a escribir tu contraseña</p>
+
+    <!-- CONFIRMAR CONTRASEÑA -->
+    <ion-item class="custom-item password-item">
+      <ion-input
+        placeholder="Confirmar contraseña"
+        [type]="showConfirmPassword ? 'text' : 'password'"
+        [(ngModel)]="confirmPassword"
+      >
+      </ion-input>
+
+      <ion-button
+        fill="clear"
+        slot="end"
+        (click)="showConfirmPasswordTemporarily()"
+      >
+        <ion-icon
+          [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"
+        >
+        </ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <!-- VALIDACIÓN DE COINCIDENCIA -->
+    <div *ngIf="confirmPassword.length > 0" class="password-match">
+      <p *ngIf="passwordsMatch()" class="match-success">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Las contraseñas coinciden
+      </p>
+      <p *ngIf="passwordsDontMatch()" class="match-error">
+        <ion-icon name="close-circle"></ion-icon>
+        Las contraseñas no coinciden
+      </p>
+    </div>
+
+    <ion-button
+      expand="block"
+      class="register-main-btn"
+      (click)="nextStepFromCredentials()"
+      [disabled]="isSubmittingStep1"
+    >
+      <ion-spinner
+        *ngIf="isSubmittingStep1"
+        name="crescent"
+        slot="start"
+      ></ion-spinner>
+
+      {{ isSubmittingStep1 ? "Creando cuenta..." : "Siguiente" }}
+    </ion-button>
+  </div>
+
+  <!-- ================= PASO 2 ================= -->
+  <div *ngIf="step === 2" class="step-container">
+    <h2>Datos personales</h2>
+
+    <ion-item class="custom-item">
+      <ion-input
+        placeholder="Nombres completos"
+        [(ngModel)]="nombres"
+      ></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-input
+        placeholder="Teléfono celular"
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        [(ngModel)]="telefono"
+      >
+      </ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-input placeholder="Dirección" [(ngModel)]="direccion"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-input
+        placeholder="Referencia domiciliaria (opcional)"
+        [(ngModel)]="referencia"
+      >
+      </ion-input>
+    </ion-item>
+
+    <ion-button
+      expand="block"
+      class="register-main-btn"
+      (click)="submitPersonalData()"
+      [disabled]="isSubmittingStep2"
+    >
+      <ion-spinner *ngIf="isSubmittingStep2" slot="start"></ion-spinner>
+      {{ isSubmittingStep2 ? "Enviando..." : "Enviar solicitud" }}
+    </ion-button>
+  </div>
+
+  <!-- ================= PASO 3 ================= -->
+  <div *ngIf="step === 3" class="step-container">
+    <h2>Solicitud enviada ✅</h2>
+
+    <p>
+      Tu cuenta está en proceso de aprobación.<br /><br />
+      Te notificaremos por correo cuando sea aprobada.
+    </p>
+
+    <ion-button expand="block" class="register-main-btn" (click)="close()">
+      Entendido
+    </ion-button>
+  </div>
+</ion-content>

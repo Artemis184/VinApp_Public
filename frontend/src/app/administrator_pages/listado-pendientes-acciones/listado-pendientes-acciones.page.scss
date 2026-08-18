@@ -1,0 +1,141 @@
+:host {
+  --card-bg-light: #ffffff;
+  --card-bg-dark: #1c1c1e;
+
+  --text-primary-light: #111111;
+  --text-primary-dark: #ffffff;
+
+  --text-secondary-light: #666666;
+  --text-secondary-dark: #b0b0b0;
+
+  --content-bg-light: #f2f2f2;
+  --content-bg-dark: #121212;
+
+  --accent-purple: #6a4aa8;
+
+  --shadow-light: 0 4px 14px rgba(0, 0, 0, 0.12);
+  --shadow-dark: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.header {
+  ion-toolbar {
+    --background: #1a1a1a;
+  }
+
+  ion-back-button {
+    --color: #ffffff;
+  }
+}
+
+.icono-perfil {
+  color: var(--accent-purple);
+  font-size: 30px;
+}
+
+ion-content {
+  --background: var(--content-bg-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-content {
+    --background: var(--content-bg-dark);
+  }
+}
+
+.titulo-general {
+  text-align: center;
+  margin: 18px 0 22px;
+
+  h2 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+  }
+}
+
+.lista-transparente {
+  background: transparent;
+}
+
+.peticion-card {
+  position: relative;
+  background: var(--card-bg-light);
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+  h3 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .peticion-card {
+    background: var(--card-bg-dark);
+    box-shadow: var(--shadow-dark);
+  }
+}
+
+.contenido-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1px 26px 16px 16px;
+}
+
+.barra-estado {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+}
+
+.barra-pendiente {
+  background: #9e9e9e;
+}
+
+.barra-aprobado {
+  background: #2dd36f;
+}
+
+.barra-rechazado {
+  background: #eb445a;
+}
+
+.nombre-solicitante {
+  font-size: 15px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  color: var(--text-primary-light);
+}
+
+.detalle-info {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 3px 0;
+  color: var(--text-secondary-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .nombre-solicitante {
+    color: var(--text-primary-dark);
+  }
+
+  .detalle-info {
+    color: var(--text-secondary-dark);
+  }
+}
+
+.icono-flecha {
+  font-size: 22px;
+  color: #999999;
+}

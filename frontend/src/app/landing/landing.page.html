@@ -1,0 +1,153 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="transparent-toolbar">
+    <ion-title class="header-title">VinApp</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="landing-container">
+    <ion-grid fixed>
+      <ion-row class="ion-align-items-center top-section">
+        <ion-col size="12" size-md="7" class="hero-col">
+          <div class="hero-section">
+            <div class="hero-logo">
+              <ion-icon
+                name="shield-checkmark-outline"
+                class="logo-icon"
+              ></ion-icon>
+            </div>
+            <h1>Bienvenido a VinApp</h1>
+            <p class="hero-subtitle">
+              Tu aplicación comunitaria para la gestión y seguridad barrial.
+            </p>
+          </div>
+
+          <ion-card class="info-card theme-card">
+            <ion-card-content class="info-content-padding">
+              <h2>¿Qué es VinApp?</h2>
+              <p>
+                VinApp es una aplicación comunitaria diseñada para facilitar la
+                interacción, organización y gestión de dispositivos IoT de
+                seguridad entre los miembros de una comunidad. Conectamos
+                vecinos para mejorar la experiencia de vida en barrio.
+              </p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="5" class="cta-col">
+          <div class="cta-section theme-card">
+            <h2>Comienza ahora</h2>
+            <p>
+              Accede al panel de control para gestionar alarmas, antenas y
+              servicios de tu comunidad.
+            </p>
+
+            <div class="button-group">
+              <ion-button
+                expand="block"
+                color="primary"
+                (click)="goToLogin()"
+                class="primary-btn"
+              >
+                Iniciar Sesión
+              </ion-button>
+              <ion-button
+                expand="block"
+                fill="outline"
+                color="primary"
+                (click)="goToRegister()"
+                class="secondary-btn"
+              >
+                Registrarse
+              </ion-button>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <ion-row class="features-section">
+        <ion-col size="12">
+          <h2 class="section-title">Características principales</h2>
+        </ion-col>
+
+        <ion-col size="12" size-md="4" class="card-col">
+          <ion-card class="feature-card theme-card">
+            <ion-card-content>
+              <div class="feature-header">
+                <div class="icon-wrapper">
+                  <ion-icon
+                    name="notifications-outline"
+                    color="primary"
+                    class="feature-icon"
+                  ></ion-icon>
+                </div>
+                <h3>Gestión de Alarmas y Nodos</h3>
+              </div>
+              <p>
+                Activa o desactiva alarmas barriales al instante. Los
+                administradores pueden gestionar la red de dispositivos de la
+                comunidad.
+              </p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="4" class="card-col">
+          <ion-card class="feature-card theme-card">
+            <ion-card-content>
+              <div class="feature-header">
+                <div class="icon-wrapper">
+                  <ion-icon
+                    name="lock-closed-outline"
+                    color="primary"
+                    class="feature-icon"
+                  ></ion-icon>
+                </div>
+                <h3>Acceso Seguro</h3>
+              </div>
+              <p>
+                Auténticate de forma segura usando tu cuenta de Google o
+                credenciales propias.
+              </p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" size-md="4" class="card-col">
+          <ion-card class="feature-card theme-card">
+            <ion-card-content>
+              <div class="feature-header">
+                <div class="icon-wrapper">
+                  <ion-icon
+                    name="document-lock-outline"
+                    color="primary"
+                    class="feature-icon"
+                  ></ion-icon>
+                </div>
+                <h3>Privacidad Protegida</h3>
+              </div>
+              <p>
+                Tu información personal está protegida conforme a nuestras
+                políticas de privacidad.
+              </p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="legal-section">
+      <p class="legal-text">Al usar VinApp aceptas nuestros términos</p>
+      <div class="legal-links">
+        <button class="legal-link" (click)="goToPrivacyPolicy()">
+          Política de Privacidad
+        </button>
+        <span class="separator">•</span>
+        <button class="legal-link" (click)="goToTermsConditions()">
+          Términos y Condiciones
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>

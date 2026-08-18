@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Datos de usuario</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- FOTO DE PERFIL -->
+  <div class="ion-text-center ion-margin-bottom">
+    <ion-avatar style="margin: auto; width: 120px; height: 120px">
+      <img
+        [src]="usuario.foto || 'assets/img/default.png'"
+        alt="Foto de perfil del usuario"
+      />
+    </ion-avatar>
+  </div>
+
+  <!-- FOTO (URL) -->
+  <ion-item>
+    <ion-label position="stacked">Foto de perfil (URL)</ion-label>
+    <ion-input [(ngModel)]="formulario.foto"></ion-input>
+  </ion-item>
+
+  <!-- TELÉFONO -->
+  <ion-item>
+    <ion-label position="stacked">Teléfono (10 dígitos obligatorios)</ion-label>
+    <ion-input
+      type="tel"
+      [(ngModel)]="formulario.telefono"
+      placeholder="Ej: 0983006569"
+      maxlength="10"
+      helperText="Debe tener exactamente 10 números"
+      [color]="usuario.telefono.length === 10 ? 'success' : 'danger'"
+    >
+    </ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Contraseña actual</ion-label>
+    <ion-input
+      type="password"
+      [(ngModel)]="formulario.passwordActual"
+      placeholder="Escribe tu clave actual para cambios"
+    >
+    </ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Nueva contraseña (mínimo 6)</ion-label>
+    <ion-input
+      type="password"
+      [(ngModel)]="formulario.nuevaPassword"
+      placeholder="Solo si deseas cambiarla"
+    >
+    </ion-input>
+  </ion-item>
+
+  <ion-button
+    expand="block"
+    class="ion-margin-top"
+    [disabled]="!hayCambios()"
+    (click)="guardarCambios()"
+  >
+    Guardar cambios
+  </ion-button>
+
+  <!-- BOTÓN SALIR -->
+  <ion-button
+    expand="block"
+    fill="outline"
+    color="medium"
+    class="ion-margin-top"
+    (click)="salir()"
+  >
+    Salir
+  </ion-button>
+</ion-content>

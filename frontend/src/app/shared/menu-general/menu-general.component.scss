@@ -1,0 +1,165 @@
+.avatar-container {
+  text-align: center;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar {
+  margin: auto;
+  width: 120px;
+  height: 120px;
+}
+
+.avatar-edit-button {
+  position: absolute;
+  right: -0.25rem;
+  bottom: -0.25rem;
+  --border-radius: 50%;
+  --background: var(--ion-color-primary-tint);
+  --background-hover: var(--ion-color-primary-tint);
+  --background-activated: var(--ion-color-primary-tint);
+  --color: var(--ion-color-light);
+  --border-color: var(--ion-color-primary-tint);
+  --border-width: 1px;
+  --border-style: solid;
+  --box-shadow: none;
+  --padding-start: 0;
+  --padding-end: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  min-width: 2.1rem;
+  min-height: 2.1rem;
+}
+
+.avatar-edit-button::part(native) {
+  border-radius: 9999px;
+  width: 2.1rem;
+  height: 2.1rem;
+  min-width: 2.1rem;
+  min-height: 2.1rem;
+  padding: 0;
+}
+
+.avatar-edit-button ion-icon {
+  font-size: 1rem;
+}
+
+.hidden-avatar-input {
+  display: none;
+}
+
+.editable-input-icon {
+  font-size: 1.15rem;
+  color: var(--ion-color-medium);
+  opacity: 0.9;
+}
+
+.readonly-item {
+  cursor: not-allowed;
+}
+
+.readonly-item ion-input {
+  --color: var(--ion-color-medium-shade);
+  --background: var(--ion-color-light-shade);
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  margin-top: 6px;
+}
+
+ion-item:not(.readonly-item) ion-input {
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.editable-item ion-input::part(native) {
+  border: 1px solid var(--ion-color-medium-tint);
+  border-radius: 8px;
+  height: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.editable-item ion-input {
+  margin-top: 6px;
+}
+
+.password-change-button {
+  margin-top: 14px;
+  margin-inline: 16px;
+  width: calc(100% - 32px);
+  --border-radius: 8px;
+  --border-color: var(--ion-color-medium-tint);
+  --color: var(--ion-color-medium-shade);
+  --min-height: 44px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.35rem;
+  padding-right: 0.25rem;
+}
+
+.toolbar-action-button {
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: transparent;
+  --background-hover: transparent;
+  --background-activated: transparent;
+  --color: var(--ion-color-medium);
+  --border-color: var(--ion-color-medium);
+  --border-width: 1px;
+  --border-style: solid;
+  --box-shadow: none;
+  width: 2.3rem;
+  height: 2.3rem;
+  min-width: 2.3rem;
+  min-height: 2.3rem;
+}
+
+.toolbar-action-button::part(native) {
+  border-radius: 9999px;
+  width: 2.3rem;
+  height: 2.3rem;
+  min-width: 2.3rem;
+  min-height: 2.3rem;
+  padding: 0;
+}
+
+.toolbar-action-button ion-icon {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 480px) {
+  .toolbar-action-button {
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+  }
+
+  .avatar-edit-button,
+  .avatar-edit-button::part(native) {
+    width: 1.9rem;
+    height: 1.9rem;
+    min-width: 1.9rem;
+    min-height: 1.9rem;
+  }
+
+  .toolbar-action-button::part(native) {
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+  }
+
+  .toolbar-action-button ion-icon {
+    font-size: 1rem;
+  }
+}
