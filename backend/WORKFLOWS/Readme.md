@@ -42,7 +42,3 @@ Estas imágenes están preparadas para verse directamente en GitHub.
 
 ![Workflow 9](./mermaid-diagram-2026-07-23-160241.png)
 
-## Notas
-
-- GitHub renderiza estas imágenes automáticamente cuando usas la sintaxis `![Texto alternativo](ruta/de/imagen.png)`.
-- Los nombres con espacios deben estar codificados como `%20` en la ruta.
