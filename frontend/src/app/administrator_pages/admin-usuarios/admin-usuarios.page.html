@@ -5,6 +5,16 @@
 ></app-admin-back-header>
 
 <ion-content fullscreen>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
   <!-- Botón de Filtros -->
   <div class="filter-toggle">
     <ion-button

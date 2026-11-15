@@ -8,8 +8,15 @@ import {
   getNodesBaseList,
 } from './audit_user_actions.controller';
 import { validationUtils } from '../../middlewares/validationMiddleware';
+import { verifyToken } from '../../middlewares/verifyToken';
+import { requireAdmin } from '../../middlewares/authorizeRoles';
 
 const router = Router();
+
+// La auditoría de usuarios (incluye el historial de alarmas ALARM_ON/OFF y la
+// eliminación de registros) expone/altera información sensible y de integridad:
+// exigir JWT + rol ADMIN/MASTER en todo el módulo, igual que audit_admin_actions.
+router.use(verifyToken, requireAdmin);
 
 router.get(
   '/getaudituseractions',

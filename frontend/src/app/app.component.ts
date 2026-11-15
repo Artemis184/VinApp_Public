@@ -4,10 +4,12 @@ import { NgIf } from '@angular/common';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AdminSideMenuComponent } from './administrator_pages/principal-administrador/components/admin-side-menu-component/admin-side-menu-component';
-import { AUTH_STORAGE, APP_ROLES } from '../constants/app.constants';
+import { APP_ROLES } from '../constants/app.constants';
 import { AuthService } from './auth/services/auth.service';
+import { SessionService } from './services/session.service';
 
 @Component({
   selector: 'app-root',
@@ -30,12 +32,14 @@ export class AppComponent implements OnInit {
 
   private router = inject(Router);
   private authService = inject(AuthService);
+  private sessionService = inject(SessionService);
   private destroyRef = inject(DestroyRef);
 
   async ngOnInit() {
     if (Capacitor.isNativePlatform()) {
       await StatusBar.setOverlaysWebView({ overlay: false });
       await StatusBar.setStyle({ style: Style.Dark });
+      await GoogleAuth.initialize();
     }
 
     this.authService.userData$
@@ -62,18 +66,13 @@ export class AppComponent implements OnInit {
   }
 
   private updateCurrentUserId() {
-    const userStr = localStorage.getItem(AUTH_STORAGE.USER);
-    try {
-      const user = userStr ? JSON.parse(userStr) : null;
-      this.currentUserId = user?.usr_uuid || null;
-    } catch {
-      this.currentUserId = null;
-    }
+    // La sesión vive en SecureStorage, no en localStorage (que quedaba vacío).
+    this.currentUserId = this.sessionService.getCurrentUser()?.uuid ?? null;
   }
 
   private updateAdminStatus(roleOverride?: string | null) {
     const role = this.normalizarRol(
-      roleOverride ?? localStorage.getItem(AUTH_STORAGE.ROLE),
+      roleOverride ?? this.sessionService.getCurrentUser()?.role ?? null,
     );
 
     const isRoleAdmin = role === APP_ROLES.ADMIN || role === APP_ROLES.MASTER;

@@ -51,4 +51,11 @@ export const routes: Routes = [
         (m) => m.TermsConditionsPage,
       ),
   },
+  {
+    path: 'delete-account',
+    loadComponent: () =>
+      import('./shared/delete-account/delete-account.page').then(
+        (m) => m.DeleteAccountPage,
+      ),
+  },
 ];

@@ -1,6 +1,7 @@
 import { PrismaClient, user_status } from '@prisma/client';
 import { STATUS_EMAIL_CONFIG } from './status-email.config';
 import { oauth2Service } from '../../services/oauth2.service';
+import { REGISTRATION_ADMIN_EMAIL_CONFIG } from './registration-admin-email.config';
 import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
@@ -59,10 +60,99 @@ export const sendStatusEmail = async (userId: string, newStatus: user_status) =>
       html: emailTemplate(templateData),
       cc: config.CORREO_ADMINISTRACION,
     });
-    console.log(`✔ Correo enviado → ${user.email} [${newStatus}]`);
+    console.log(`✔ Correo de estado enviado [${newStatus}]`);
     return true;
   } catch (error) {
-    console.error(`✖ Error enviando correo de estado [${newStatus}] al usuario ${userId}:`, error);
+    console.error(`✖ Error enviando correo de estado [${newStatus}]`);
     throw error; // Relanzar el error para que el llamador lo sepa
+  }
+};
+
+export const sendRegistrationAdminEmail = async (userId: string) => {
+  try {
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        created_at: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const administrators = await prisma.users.findMany({
+      where: {
+        OR: [
+          {
+            user_roles: {
+              some: {
+                roles: {
+                  name: 'ADMIN',
+                },
+              },
+            },
+          },
+          {
+            is_master: true,
+          },
+        ],
+      },
+      select: {
+        email: true,
+      },
+    });
+
+    const adminEmails = [
+      ...new Set(
+        administrators
+          .map((admin) => admin.email)
+          .filter((email): email is string => Boolean(email))
+      ),
+    ];
+
+    if (adminEmails.length === 0) {
+      console.warn('No se encontraron administradores para notificar el nuevo registro');
+      return false;
+    }
+
+    const adminTemplateSource = await fs.promises.readFile(
+      path.join(__dirname, 'templates', 'registration-admin-notification.html'),
+      'utf8'
+    );
+
+    const adminEmailTemplate = Handlebars.compile(adminTemplateSource);
+
+    const templateData = {
+      title: REGISTRATION_ADMIN_EMAIL_CONFIG.title,
+      greeting: REGISTRATION_ADMIN_EMAIL_CONFIG.greeting,
+      mainMessage: REGISTRATION_ADMIN_EMAIL_CONFIG.mainMessage,
+      accentColor: REGISTRATION_ADMIN_EMAIL_CONFIG.accentColor,
+      appName: REGISTRATION_ADMIN_EMAIL_CONFIG.appName,
+      currentYear: new Date().getFullYear(),
+      userFullName: user.full_name || 'No especificado',
+      userEmail: user.email,
+      registrationDate: user.created_at,
+    };
+
+    const transporter = await oauth2Service.getTransporter();
+
+    await transporter.sendMail({
+      from: `"VinApp" <${config.GMAIL}>`,
+      to: adminEmails,
+      subject: REGISTRATION_ADMIN_EMAIL_CONFIG.title,
+      html: adminEmailTemplate(templateData),
+    });
+
+    console.log(`✔ Correo de nuevo registro enviado a ${adminEmails.length} administrador(es)`);
+
+    return true;
+  } catch (error) {
+    console.error('✖ Error enviando correo de nuevo registro');
+
+    throw error;
   }
 };

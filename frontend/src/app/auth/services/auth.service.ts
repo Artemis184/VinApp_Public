@@ -19,6 +19,7 @@ import {
   UserData,
 } from '../../interfaces/session.interface';
 import { AUTH_STORAGE, SESSION_CONFIG } from 'src/constants/app.constants';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Injectable({
   providedIn: 'root',
@@ -58,16 +59,17 @@ export class AuthService {
 
       if (this.sessionService.shouldRefreshToken()) {
         try {
-          await firstValueFrom(this.refreshToken({ preserveSessionOnFailure: true }));
+          await firstValueFrom(
+            this.refreshToken({ preserveSessionOnFailure: true }),
+          );
         } catch (refreshError) {
-          console.warn(
-            'Refresh inicial falló, manteniendo sesión restaurada:',
-            refreshError,
+          appLogger.warn(
+            'Refresh inicial falló, manteniendo sesión restaurada',
           );
         }
       }
     } catch (error) {
-      console.error('Error inicializando autenticacion:', error);
+      appLogger.error('Error inicializando autenticacion');
       this.setUnauthenticated();
     }
   }
@@ -114,7 +116,9 @@ export class AuthService {
   }
 
   // Request a new access token using refresh token
-  refreshToken(options?: { preserveSessionOnFailure?: boolean }): Observable<RefreshTokenResponse> {
+  refreshToken(options?: {
+    preserveSessionOnFailure?: boolean;
+  }): Observable<RefreshTokenResponse> {
     return from(this.sessionService.generateDeviceId()).pipe(
       switchMap((deviceId) =>
         this.http.post<RefreshTokenResponse>(
@@ -150,10 +154,7 @@ export class AuthService {
         return response;
       }),
       catchError((error) => {
-        console.error(
-          'Error refrescando token:',
-          error?.error?.message || error?.message || error,
-        );
+        appLogger.error('Error refrescando token');
 
         if (error?.status === 429) {
           const retryAfterHeader = error?.headers?.get?.('Retry-After');
@@ -201,7 +202,7 @@ export class AuthService {
         return {};
       }),
       catchError(async (error) => {
-        console.error('Error en logout remoto, limpiando sesion local:', error);
+        appLogger.error('Error en logout remoto, limpiando sesion local');
         await this.sessionService.clearSession();
         this.clearLegacyStorage();
         this.setUnauthenticated();
@@ -318,6 +319,27 @@ export class AuthService {
 
     await this.sessionService.saveSession(sessionData);
     this.setAuthenticatedUser(sessionData);
+
+    // Compatibilidad: el menú lateral, los headers y las páginas principales
+    // todavía leen el rol/usuario desde estas claves legacy de localStorage.
+    // El login por correo las escribía, pero el de Google NO, dejando el menú
+    // vacío ("No hay menús disponibles"). Se escriben aquí, en el punto común
+    // de ambos flujos (login y loginWithGoogle pasan por handleLoginResponse).
+    try {
+      if (response.User_data) {
+        localStorage.setItem(
+          AUTH_STORAGE.ROLE,
+          response.User_data.usr_rol ?? '',
+        );
+        localStorage.setItem(
+          AUTH_STORAGE.USER,
+          JSON.stringify(response.User_data),
+        );
+      }
+    } catch {
+      // Si localStorage no está disponible, la sesión en SecureStorage sigue
+      // siendo la fuente real; no bloqueamos el login por esto.
+    }
 
     return response;
   }

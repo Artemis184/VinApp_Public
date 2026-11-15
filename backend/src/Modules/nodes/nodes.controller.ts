@@ -13,17 +13,58 @@ import {
   crearNodo,
   actualizarNodo,
   eliminarNodo,
+  crearRegistroSalud,
+  obtenerUltimaSalud,
+  obtenerNodoPorSlotRF,
+  obtenerHistorialSalud,
+  obtenerResumenSaludNodo,
 } from './nodes.service';
 import { getNodeCommunicationMethod } from '../../services/nodeCommunication.service';
+import { deleteObjectByUrl, uploadObject } from '../../services/objectStorage.service';
+import { getNodesByUserId } from '../user_nodes/user_nodes.service';
+import { ROLE_NAMES } from '../../constants/constants';
+import { validationUtils } from '../../middlewares/validationMiddleware';
 
+// ADMIN/MASTER ven todos los nodos; el resto, solo los asignados.
+const isPrivilegedRequester = (req: Request): boolean => {
+  const user = (req as Request & { user?: { role?: string; is_master?: boolean } }).user;
+  return user?.role === ROLE_NAMES.ADMIN || user?.is_master === true;
+};
+
+const getRequesterUserId = (req: Request): string | undefined =>
+  (req as Request & { user?: { user_uuid?: string } }).user?.user_uuid;
+
+interface NodeHealthPayload {
+  nodeId?: number;
+  code?: string;
+  rfNode: number;
+  radioReinits: number;
+  boots: number;
+  rxCount: number;
+  uptimeHours: number;
+  abnormalReset?: boolean;
+  reinitThisSession?: boolean;
+  viaRepeater?: string;
+}
 // Helper para normalizar parámetros de ruta (pueden ser string | string[])
 const getParam = (param: string | string[] | undefined): string => {
   return Array.isArray(param) ? param[0] : param || '';
 };
 
+// Filtra la lista de nodos dejando solo los asignados al usuario (si no es admin).
+const scopeNodosToRequester = async (req: Request, nodos: any[]): Promise<any[]> => {
+  if (isPrivilegedRequester(req)) return nodos;
+
+  const userId = getRequesterUserId(req);
+  if (!userId) return [];
+
+  const assignedIds = new Set(await getNodesByUserId(userId));
+  return nodos.filter((nodo) => assignedIds.has(nodo.id));
+};
+
 export const getNodos = async (req: Request, res: Response) => {
   try {
-    const nodos = await obtenerTodoNodos();
+    const nodos = await scopeNodosToRequester(req, await obtenerTodoNodos());
     res.status(200).json({
       cant: nodos.length,
       data: nodos,
@@ -37,7 +78,7 @@ export const getNodos = async (req: Request, res: Response) => {
 
 export const getAllNodos = async (req: Request, res: Response) => {
   try {
-    const nodos = await todoNodos();
+    const nodos = await scopeNodosToRequester(req, await todoNodos());
     res.status(200).json({
       cant: nodos.length,
       data: nodos,
@@ -87,9 +128,21 @@ export const getMaestroNodeMap = async (req: Request, res: Response) => {
   }
 };
 
+// Verifica que un CLIENTE solo acceda a un nodo asignado a él.
+const requesterCanSeeNode = async (req: Request, nodeId: number): Promise<boolean> => {
+  if (isPrivilegedRequester(req)) return true;
+  const userId = getRequesterUserId(req);
+  if (!userId) return false;
+  const assignedIds = new Set(await getNodesByUserId(userId));
+  return assignedIds.has(nodeId);
+};
+
 export const getNodoById = async (req: Request, res: Response) => {
   const id = parseInt(getParam(req.params.id));
   try {
+    if (!(await requesterCanSeeNode(req, id))) {
+      return res.status(404).json({ message: 'Nodo no encontrado' });
+    }
     const nodo = await obtenerNodoporId(id);
     if (nodo) {
       res.status(200).json({
@@ -109,6 +162,9 @@ export const getNodoByCode = async (req: Request, res: Response) => {
   const code = getParam(req.params.code);
   try {
     const nodo = await obtenerNodoporCode(code);
+    if (nodo && !(await requesterCanSeeNode(req, nodo.id))) {
+      return res.status(404).json({ message: 'Nodo no encontrado' });
+    }
     if (nodo) {
       res.status(200).json({
         data: nodo,
@@ -124,8 +180,8 @@ export const getNodoByCode = async (req: Request, res: Response) => {
 };
 
 export const postNodo = async (req: Request, res: Response) => {
-  const data = req.body;
   try {
+    const data = validationUtils.nodeText(req.body);
     const newNodo = await crearNodo(data);
     res.status(201).json({
       data: newNodo,
@@ -139,6 +195,12 @@ export const postNodo = async (req: Request, res: Response) => {
 
 export const PatchNodo = async (req: Request, res: Response) => {
   const id = parseInt(getParam(req.params.id));
+  let sanitizedBody: Record<string, any>;
+  try {
+    sanitizedBody = validationUtils.nodeText(req.body);
+  } catch (validationError: any) {
+    return res.status(400).json({ message: validationError.message || 'Datos de nodo inválidos' });
+  }
   const {
     name,
     code,
@@ -146,11 +208,10 @@ export const PatchNodo = async (req: Request, res: Response) => {
     location,
     communication_method,
     ip_address,
-    rf_address,
     rf_slot,
     installation_image,
     is_enabled,
-  } = req.body;
+  } = sanitizedBody;
   try {
     const existingNode = await obtenerNodoporId(id);
 
@@ -167,13 +228,20 @@ export const PatchNodo = async (req: Request, res: Response) => {
     if (communication_method !== undefined)
       dataToUpdate.communication_method = communication_method;
     if (ip_address !== undefined) dataToUpdate.ip_address = ip_address;
-    if (rf_address !== undefined) dataToUpdate.rf_address = rf_address;
     if (rf_slot !== undefined) dataToUpdate.rf_slot = rf_slot;
     if (installation_image !== undefined) dataToUpdate.installation_image = installation_image;
     if (is_enabled !== undefined) dataToUpdate.is_enabled = is_enabled;
 
     // 👇 MANEJO DE IMAGEN CON MULTER
     if (req.file) {
+      const extension = req.file.mimetype.split('/')[1] || 'jpg';
+      const objectKey = `images/nodes/${id}/image-${Date.now()}.${extension}`;
+      const publicUrl = await uploadObject({
+        key: objectKey,
+        body: req.file.buffer,
+        contentType: req.file.mimetype,
+      });
+
       // borrar imagen anterior si existe
       if (existingNode.installation_image) {
         let storedImagePath = existingNode.installation_image;
@@ -190,17 +258,15 @@ export const PatchNodo = async (req: Request, res: Response) => {
           // Si empieza con "/", lo tratamos como ruta relativa a la raíz pública
           storedImagePath = storedImagePath.replace(/^\/+/, '');
         }
-        const oldPath = path.join(process.cwd(), storedImagePath);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
+        if (existingNode.installation_image.startsWith('http')) {
+          await deleteObjectByUrl(existingNode.installation_image);
+        } else {
+          const oldPath = path.join(process.cwd(), storedImagePath);
+          if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+          }
         }
       }
-      // Guardamos una URL pública absoluta para que el frontend (en otro dominio)
-      // pueda usarla directamente como src de la imagen.
-      const publicPath = `/uploads/nodes_images/${req.file.filename}`;
-      const host = req.get('host');
-      const protocol = req.protocol;
-      const publicUrl = host != null ? `${protocol}://${host}${publicPath}` : publicPath;
       dataToUpdate.installation_image = publicUrl;
     }
 
@@ -313,8 +379,6 @@ export const reportNodeRecovery = async (req: Request, res: Response) => {
  */
 export const reportNodeFailure = async (req: Request, res: Response) => {
   console.log('\n📡 POST /api/nodes/failure - Petición recibida');
-  console.log('   ↳ Body:', req.body);
-  console.log('   ↳ Headers:', req.headers);
 
   const { nodeId, comando, intentos } = req.body;
 
@@ -363,5 +427,206 @@ export const reportNodeFailure = async (req: Request, res: Response) => {
       success: false,
       message: error.message || 'Error al reportar fallo',
     });
+  }
+};
+
+/**
+ * Registra un reporte de salud de un nodo hijo.
+ * Lo llama el Maestro RF24 (API Key).
+ *
+ * El hijo manda estos contadores dentro del ACK payload de
+ * cada comando RF. Los persistentes (radioReinits, boots)
+ * viven en su EEPROM y sobreviven a reinicios y cortes de
+ * luz; los otros son volatiles.
+ *
+ * El maestro ya filtra por cadencia (solo postea cuando algo
+ * cambia, o un snapshot por hora). Aca se deduplica igual
+ * por si se reinicia el maestro o llegan repetidos.
+ */
+export const reportNodeHealth = async (req: Request, res: Response) => {
+  const {
+    nodeId,
+    code,
+    rfNode,
+    radioReinits,
+    boots,
+    rxCount,
+    uptimeHours,
+    abnormalReset = false,
+    reinitThisSession = false,
+    viaRepeater,
+  } = req.body as NodeHealthPayload;
+  if (rfNode === undefined || rfNode < 1 || rfNode > 5) {
+    return res.status(400).json({
+      success: false,
+      message: 'rfNode es requerido y debe estar entre 1 y 5',
+    });
+  }
+  try {
+    // Resolver el nodo: por id, luego por code, y como
+    // ultimo recurso por slot RF.
+    let node = null;
+    if (nodeId) node = await obtenerNodoporId(nodeId);
+    if (!node && code) node = await obtenerNodoporCode(code);
+    if (!node) node = await obtenerNodoPorSlotRF(rfNode);
+    if (!node) {
+      console.warn(`⚠️  Salud recibida de rfNode=${rfNode} sin nodo asociado`);
+      return res.status(404).json({
+        success: false,
+        message: 'Nodo no encontrado',
+      });
+    }
+    const ultimo = await obtenerUltimaSalud(node.id);
+    const unaHoraAtras = new Date(Date.now() - 60 * 60 * 1000);
+    const sinCambios =
+      ultimo &&
+      ultimo.radio_reinits === radioReinits &&
+      ultimo.boots === boots &&
+      ultimo.abnormal_reset === abnormalReset &&
+      ultimo.recorded_at > unaHoraAtras;
+    if (sinCambios) {
+      return res.status(200).json({
+        success: true,
+        message: 'Sin cambios, no se registro',
+        deduplicated: true,
+      });
+    }
+    const log = await crearRegistroSalud({
+      node_id: node.id,
+      rf_node: rfNode,
+      radio_reinits: radioReinits ?? 0,
+      boots: boots ?? 0,
+      rx_count: rxCount ?? 0,
+      uptime_hours: uptimeHours ?? 0,
+      abnormal_reset: abnormalReset,
+      reinit_this_session: reinitThisSession,
+      via_repeater: viaRepeater ?? null,
+    });
+    // Un reinicio de radio o un reset anormal son sintomas
+    // reales, no ruido. Vale la pena que queden visibles y
+    // que el front se entere en el momento.
+    const subioReinits = radioReinits > (ultimo?.radio_reinits ?? 0);
+    if (subioReinits) {
+      console.warn(
+        `⚠️  ${node.code}: reinicios de radio ${ultimo?.radio_reinits ?? 0} → ${radioReinits}`
+      );
+    }
+    if (abnormalReset) {
+      console.warn(`⚠️  ${node.code}: reinicio anormal (watchdog o excepcion)`);
+    }
+    if (subioReinits || abnormalReset) {
+      const io = getIO();
+      io.emit('node:health:alert', {
+        nodeId: node.id,
+        code: node.code,
+        radioReinits,
+        boots,
+        abnormalReset,
+        timestamp: new Date(),
+      });
+    }
+    return res.status(201).json({
+      success: true,
+      message: 'Salud registrada',
+      data: {
+        id: log.id.toString(),
+        code: node.code,
+        recordedAt: log.recorded_at,
+      },
+    });
+  } catch (error: any) {
+    console.error('❌ Error al registrar salud del nodo:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error al registrar salud del nodo',
+    });
+  }
+};
+/**
+ * Historial de salud de un nodo.
+ * Query: ?limit=100&days=30
+ */
+export const getNodeHealthHistory = async (req: Request, res: Response) => {
+  const id = parseInt(getParam(req.params.id));
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ message: 'ID de nodo inválido' });
+  }
+  try {
+    const logs = await obtenerHistorialSalud(id, {
+      limit: Number(req.query.limit) || undefined,
+      days: Number(req.query.days) || undefined,
+    });
+    res.status(200).json({
+      cant: logs.length,
+      data: logs.map((l) => ({ ...l, id: l.id.toString() })),
+      message: 'Historial de salud obtenido exitosamente',
+    });
+  } catch (error) {
+    console.error('Error al obtener historial de salud:', error);
+    res.status(500).json({ message: 'Error al obtener historial de salud' });
+  }
+};
+/**
+ * Ultimo estado de salud de cada nodo habilitado, con el
+ * delta de reinicios de los ultimos N dias.
+ *
+ * Esta es la vista del seguimiento semanal: si
+ * reinitsLast7Days da 0 en todos, el fix del TX FIFO del
+ * firmware de hijo v2.3 esta funcionando y se puede
+ * replicar al resto de los nodos.
+ */
+export const getNodeHealthSummary = async (req: Request, res: Response) => {
+  const days = Number(req.query.days) || 7;
+  try {
+    const nodos = await obtenerTodoNodos();
+    const data = await Promise.all(
+      nodos.map(async (node) => {
+        const { ultimo, primeroVentana, anormalesVentana } = await obtenerResumenSaludNodo(
+          node.id,
+          days
+        );
+        if (!ultimo) {
+          return {
+            nodeId: node.id,
+            code: node.code,
+            name: node.name,
+            rfSlot: node.rf_slot,
+            sinDatos: true,
+          };
+        }
+        // Delta, no absoluto: el absoluto arrastra historia
+        // vieja y no dice como esta el nodo ahora.
+        const reinitsEnVentana = primeroVentana
+          ? ultimo.radio_reinits - primeroVentana.radio_reinits
+          : 0;
+        const bootsEnVentana = primeroVentana ? ultimo.boots - primeroVentana.boots : 0;
+        return {
+          nodeId: node.id,
+          code: node.code,
+          name: node.name,
+          rfSlot: node.rf_slot,
+          sinDatos: false,
+          radioReinits: ultimo.radio_reinits,
+          boots: ultimo.boots,
+          uptimeHours: ultimo.uptime_hours,
+          rxCount: ultimo.rx_count,
+          viaRepeater: ultimo.via_repeater,
+          lastReportAt: ultimo.recorded_at,
+          ventanaDias: days,
+          reinitsEnVentana,
+          bootsEnVentana,
+          resetsAnormalesEnVentana: anormalesVentana,
+          healthy: reinitsEnVentana === 0 && anormalesVentana === 0,
+        };
+      })
+    );
+    res.status(200).json({
+      cant: data.length,
+      data,
+      message: 'Resumen de salud obtenido exitosamente',
+    });
+  } catch (error) {
+    console.error('Error al obtener resumen de salud:', error);
+    res.status(500).json({ message: 'Error al obtener resumen de salud' });
   }
 };

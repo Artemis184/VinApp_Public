@@ -78,7 +78,9 @@ export const generateResetCode = async (email: string): Promise<boolean> => {
     },
   });
 
-  await sendPasswordResetEmail(user.email, code);
+  void sendPasswordResetEmail(user.email, code).catch((error) => {
+    console.error('Error al enviar email de recuperación de contraseña:', error);
+  });
   return true;
 };
 

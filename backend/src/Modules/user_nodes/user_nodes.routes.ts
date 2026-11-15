@@ -8,6 +8,7 @@ import {
 } from './user_nodes.controller';
 
 import { verifyToken } from '../../middlewares/verifyToken';
+import { requireAdmin, requireSelfOrAdmin } from '../../middlewares/authorizeRoles';
 import { adminAudit } from '../../middlewares/auditoria/adminAudit';
 import { PrismaClient, admin_action_type } from '@prisma/client';
 const prisma = new PrismaClient();
@@ -15,16 +16,18 @@ const prisma = new PrismaClient();
 const router = Router();
 
 /**
- * NUEVA RUTA: Sincronización masiva desde el Modal
- * Soluciona el error 404
+ * Sincronización masiva desde el Modal: operación administrativa.
  */
-router.post('/assign-bulk', verifyToken, postAssignBulk);
+router.post('/assign-bulk', verifyToken, requireAdmin, postAssignBulk);
 
+// El usuario puede consultar sus propios nodos; un admin, los de cualquiera.
+// Antes aceptaba cualquier user_id con solo estar autenticado (IDOR).
 router.get(
   '/getnodesbyuserid/:user_id',
   // #swagger.tags = ['User Nodes']
   // #swagger.description = 'Obtiene los nodos asignados a un usuario por su ID'
   verifyToken,
+  requireSelfOrAdmin('user_id'),
   getNodesByUserId
 );
 
@@ -33,6 +36,7 @@ router.post(
   // #swagger.tags = ['User Nodes']
   // #swagger.description = 'Asigna un nodo a un usuario'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.ASSIGN_NODE,
     getNewValue: (req) => ({
@@ -51,6 +55,7 @@ router.patch(
   // #swagger.tags = ['User Nodes']
   // #swagger.description = 'Actualiza el estado de un nodo de usuario'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.REVOKE_NODE,
 

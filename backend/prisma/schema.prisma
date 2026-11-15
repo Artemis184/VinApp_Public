@@ -48,7 +48,7 @@ model nodes {
   code                String                @unique @db.VarChar(50)
   description         String?
   location            String?
-  communication_method node_communication_method @default(auto)
+  communication_method node_communication_method @default(rf)
   ip_address          String?               @db.VarChar(45)
   rf_address          String?               @db.VarChar(50)
   rf_slot             Int?
@@ -63,6 +63,7 @@ model nodes {
   audit_admin_actions audit_admin_actions[]
   audit_user_actions  audit_user_actions[]
   user_nodes          user_nodes[]
+  node_health_logs    node_health_logs[]      // <-- AGREGAR
 }
 
 model notifications {
@@ -221,6 +222,37 @@ model sessions {
   @@index([expires_at], map: "idx_sessions_expires")
 }
 
+// Historial de salud reportado por los nodos hijos.
+// El hijo manda estos contadores en cada ACK RF; el maestro
+// los captura y postea solo cuando cambian (o un snapshot
+// por hora), asi la tabla no se llena de filas repetidas.
+model node_health_logs {
+  id             BigInt   @id @default(autoincrement())
+  node_id        Int
+  rf_node        Int      // slot RF (1..5) reportado por el hijo
+
+  // Contadores persistentes en la EEPROM del hijo:
+  // sobreviven a reinicios Y a cortes de luz.
+  radio_reinits  Int      @default(0)  // reinicios del radio NRF24
+  boots          Int      @default(0)  // arranques del ESP
+
+  // Volatiles, se reinician con el nodo. Saturan:
+  // rx_count en 65535, uptime_hours en 255 (10.6 dias).
+  rx_count       Int      @default(0)
+  uptime_hours   Int      @default(0)
+
+  abnormal_reset      Boolean @default(false) // watchdog o excepcion
+  reinit_this_session Boolean @default(false)
+
+  via_repeater   String?  @db.VarChar(10)  // "RPT02" o null si directo
+  recorded_at    DateTime @default(now()) @db.Timestamp(6)
+
+  nodes          nodes    @relation(fields: [node_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([node_id, recorded_at], map: "idx_node_health_node_time")
+  @@index([recorded_at], map: "idx_node_health_time")
+  @@index([abnormal_reset], map: "idx_node_health_abnormal")
+}
 enum admin_action_type {
   APPROVE_USER
   REJECT_USER

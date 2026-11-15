@@ -8,7 +8,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:test": "npm run generate-env && ng serve --configuration test --port 81",
     "build": "ng build",
+    "build:test": "npm run generate-env && ng build --configuration test",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "eslint . --ext .ts,.html --fix",
@@ -36,6 +38,7 @@
     "@capacitor/keyboard": "7.0.3",
     "@capacitor/preferences": "^7.0.3",
     "@capacitor/status-bar": "^7.0.3",
+    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@ionic/angular": "^8.0.0",
     "@ionic/storage-angular": "^4.0.0",
     "dotenv": "^17.2.3",

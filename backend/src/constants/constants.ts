@@ -11,11 +11,17 @@ import crypto from 'crypto';
  * - REFRESH_TOKEN_EXPIRY_DAYS: Días de validez del refresh token
  * - DEVICE_ID_MIN_LENGTH: Longitud mínima válida para un device_id
  */
+// Vida del refresh token (en días). Antes estaba en 36500 (~100 años), lo que
+// convertía un refresh robado en una credencial efectivamente perpetua.
+// 60 días da una sesión larga ("mantener sesión") sin dejar el token válido
+// para siempre. La rotación en cada /refresh ya genera un token nuevo.
+const REFRESH_TOKEN_EXPIRY_DAYS = 60;
+
 export const SESSION_CONFIG = {
   HASH_ALGORITHM: 'sha256',
   HASH_ENCODING: 'hex' as crypto.BinaryToTextEncoding,
   REFRESH_TOKEN_BYTES: 32,
-  REFRESH_TOKEN_EXPIRY_DAYS: 36500,
+  REFRESH_TOKEN_EXPIRY_DAYS,
   DEVICE_ID_MIN_LENGTH: 16,
 };
 
@@ -96,8 +102,9 @@ export const SECURITY_CONFIG = {
   TOKEN_TTL: {
     ACCESS_TOKEN_EXPIRES_IN: '15m',
     ACCESS_TOKEN_MS: 15 * 60 * 1000,
-    REFRESH_TOKEN_MS: 36500 * 24 * 60 * 60 * 1000,
-    CSRF_TOKEN_SECONDS: 36500 * 24 * 60 * 60,
+    // Derivados del mismo valor que SESSION_CONFIG para mantener coherencia.
+    REFRESH_TOKEN_MS: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+    CSRF_TOKEN_SECONDS: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60,
   },
   SESSION_ACTIVITY: {
     LAST_USED_UPDATE_INTERVAL_MS: 5 * 60 * 1000,

@@ -34,5 +34,7 @@ COPY --from=build /app/src/Modules/email/templates ./dist/src/Modules/email/temp
 
 EXPOSE 3018
 
-# Ejecuta migraciones y luego aplica seeds antes de iniciar
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run seed:prod && node dist/src/index.js"]
+# Migra siempre. El seed solo corre si RUN_SEED != "false": en producción,
+# conviene poner RUN_SEED=false tras el primer despliegue para no re-sembrar en
+# cada deploy; en testing puede quedar en true para datos de prueba.
+CMD ["sh", "-c", "npx prisma migrate deploy && { [ \"$RUN_SEED\" = \"false\" ] || npm run seed:prod; } && node dist/src/index.js"]

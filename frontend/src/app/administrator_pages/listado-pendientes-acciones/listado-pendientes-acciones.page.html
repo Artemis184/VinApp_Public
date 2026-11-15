@@ -5,6 +5,16 @@
 ></app-admin-back-header>
 
 <ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
   <ion-list lines="none" class="ion-padding lista-transparente">
     <ion-card
       *ngFor="let u of usuarios"

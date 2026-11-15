@@ -18,6 +18,7 @@ import { Alarmas } from 'src/app/administrator_pages/services/alarmas';
 import { UserNodes } from 'src/app/administrator_pages/services/user-nodes';
 import { SessionService } from 'src/app/services/session.service';
 import { AUTH_STORAGE } from 'src/constants/app.constants';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   selector: 'app-principal-usuariof',
@@ -75,11 +76,7 @@ export class PrincipalUsuariofPage implements OnInit {
       this.alarmasUsuario = nodosAsignados.map((nodo) => ({
         id: nodo.id,
         nombre: nodo.name,
-        direccion:
-          nodo.rf_address ||
-          nodo.description ||
-          nodo.location ||
-          'Sin dirección',
+        direccion: nodo.description || nodo.location || 'Sin dirección',
         encendida: false,
         loading: false,
         isEnabled: nodo.is_enabled,
@@ -90,10 +87,7 @@ export class PrincipalUsuariofPage implements OnInit {
         this.errorMessage = 'No tienes nodos asignados.';
       }
     } catch (error) {
-      console.error(
-        '[PrincipalUsuariof] Error cargando nodos asignados',
-        error,
-      );
+      appLogger.error('[PrincipalUsuariof] Error cargando nodos asignados');
       this.alarmasUsuario = [];
       this.errorMessage = 'No se pudieron cargar tus nodos asignados.';
     } finally {
@@ -130,10 +124,7 @@ export class PrincipalUsuariofPage implements OnInit {
 
       this.socketService.requestNodeStates(nodeIds);
     } catch (error) {
-      console.error(
-        '[PrincipalUsuariof] Error sincronizando estado inicial',
-        error,
-      );
+      appLogger.error('[PrincipalUsuariof] Error sincronizando estado inicial');
     }
   }
 
@@ -166,7 +157,7 @@ export class PrincipalUsuariofPage implements OnInit {
       await this.cargarNodosAsignados();
       await this.sincronizarEstadosIniciales();
     } catch (error) {
-      console.error('[Refresh] Error al actualizar:', error);
+      appLogger.error('[Refresh] Error al actualizar');
     } finally {
       event.target.complete();
     }

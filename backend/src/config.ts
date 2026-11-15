@@ -50,9 +50,23 @@ export const config = {
   NODE_ENV,
   JWT_SECRET: process.env.JWT_SECRET || '',
   DATABASE_URL: process.env.DATABASE_URL || '',
-  ARDUINO_API_KEY: process.env.ARDUINO_API_KEY || '',
+  // Sin default: si no se define, los endpoints del maestro (failure/recovery/
+  // health/map) rechazan toda petición (fail-closed) en vez de aceptar una
+  // clave pública conocida que estaba en el repositorio.
+  ARDUINO_API_KEY: (process.env.ARDUINO_API_KEY || '').trim(),
   ENABLE_HEARTBEAT: process.env.ENABLE_HEARTBEAT !== 'false',
   HEARTBEAT_INTERVAL_MS: Number(process.env.HEARTBEAT_INTERVAL_MS) || 60_000,
+  TELEGRAM_PUBLIC_BOT_TOKEN: (process.env.TELEGRAM_PUBLIC_BOT_TOKEN || '').trim(),
+  TELEGRAM_PUBLIC_CHAT_ID: (process.env.TELEGRAM_PUBLIC_CHAT_ID || '').trim(),
+  TELEGRAM_ADMIN_BOT_TOKEN: (process.env.TELEGRAM_ADMIN_BOT_TOKEN || '').trim(),
+  TELEGRAM_ADMIN_CHAT_ID: (process.env.TELEGRAM_ADMIN_CHAT_ID || '').trim(),
+  // Servicio independiente de notificaciones (carpeta notifier/). Si NOTIFIER_URL
+  // queda vacío, el backend envía directo a Telegram con las variables TELEGRAM_*
+  // (modo legado). Con NOTIFIER_URL definido, los tokens de Telegram viven solo
+  // en el notifier.
+  NOTIFIER_URL: (process.env.NOTIFIER_URL || '').trim().replace(/\/+$/, ''),
+  NOTIFIER_API_KEY: (process.env.NOTIFIER_API_KEY || '').trim(),
+  NOTIFIER_TIMEOUT_MS: Number(process.env.NOTIFIER_TIMEOUT_MS) || 2000,
 
   // HMAC Secret para hashear refresh tokens
   HMAC_SECRET: (process.env.HMAC_SECRET || '').trim(),
@@ -90,6 +104,7 @@ export const config = {
   AUTH_RATE_LIMIT_WINDOW_MS: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 60_000,
   AUTH_LOGIN_RATE_LIMIT_MAX: Number(process.env.AUTH_LOGIN_RATE_LIMIT_MAX) || 8,
   AUTH_REFRESH_RATE_LIMIT_MAX: Number(process.env.AUTH_REFRESH_RATE_LIMIT_MAX) || 10,
+  AUTH_REGISTER_RATE_LIMIT_MAX: Number(process.env.AUTH_REGISTER_RATE_LIMIT_MAX) || 5,
   GLOBAL_RATE_LIMIT_WINDOW_MS: Number(process.env.GLOBAL_RATE_LIMIT_WINDOW_MS) || 60_000,
   GLOBAL_RATE_LIMIT_MAX: Number(process.env.GLOBAL_RATE_LIMIT_MAX) || 300,
   BODY_JSON_LIMIT: process.env.BODY_JSON_LIMIT || '5mb',
@@ -100,7 +115,7 @@ export const config = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
 };
 
-const requiredEnvVarsForAuth = ['JWT_SECRET', 'HMAC_SECRET'] as const;
+const requiredEnvVarsForAuth = ['HMAC_SECRET'] as const;
 
 if (config.NODE_ENV !== 'test') {
   const missingEnvVars = requiredEnvVarsForAuth.filter((envVar) => !config[envVar]);

@@ -21,6 +21,7 @@ import bcrypt from 'bcrypt';
 import { SessionService } from '../../services/session.service';
 import { setAuthCookies } from '../../utils/authCookies';
 import { SECURITY_CONFIG } from '../../constants/constants';
+import { deleteObjectByUrl, uploadObject } from '../../services/objectStorage.service';
 
 interface AuthRequest extends Request {
   user?: {
@@ -59,6 +60,13 @@ const isManagedAvatar = (profilePhoto?: string | null): boolean => {
 };
 
 const removeAvatarFile = async (fileName?: string | null): Promise<void> => {
+  if (!fileName) return;
+
+  if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
+    await deleteObjectByUrl(fileName);
+    return;
+  }
+
   if (!isManagedAvatar(fileName)) return;
 
   const safeFileName = path.basename(fileName as string);
@@ -245,10 +253,10 @@ export const postUserGoogle = async (req: Request, res: Response) => {
     console.log(`🔐 [postUserGoogle] Validando token de Google...`);
     // 1️⃣ Validar token con Google
     const googleUser = await verifyGoogleIdToken(id_token);
-    console.log(`✅ [postUserGoogle] Token validado. Email: ${googleUser.email}`);
+    console.log('✅ [postUserGoogle] Token validado');
 
     // 2️⃣ Buscar usuario por email
-    console.log(`🔍 [postUserGoogle] Buscando usuario con email: ${googleUser.email}`);
+    console.log('🔍 [postUserGoogle] Buscando usuario');
     const user = await prisma.users.findUnique({
       where: { email: googleUser.email },
       include: {
@@ -277,11 +285,11 @@ export const postUserGoogle = async (req: Request, res: Response) => {
       });
     }
 
-    console.log(`👤 [postUserGoogle] Usuario YA EXISTE. Estado: ${user.status}`);
+    console.log('👤 [postUserGoogle] Usuario ya existe');
 
     // 4️⃣ Usuario existe pero no aprobado
     if (user.status !== user_status.APPROVED) {
-      console.log(`⛔ [postUserGoogle] Usuario existe pero NO está aprobado (${user.status})`);
+      console.log('⛔ [postUserGoogle] Usuario existe pero no está aprobado');
       return res.status(403).json({
         message: 'Tu cuenta aún no ha sido aprobada',
       });
@@ -314,7 +322,7 @@ export const postUserGoogle = async (req: Request, res: Response) => {
       accessToken,
       session.refreshToken,
       String(session.sessionId),
-      deviceId,
+      deviceId
     );
 
     await prisma.users.update({
@@ -322,7 +330,7 @@ export const postUserGoogle = async (req: Request, res: Response) => {
       data: { last_login_at: new Date() },
     });
 
-    console.log(`🎉 [postUserGoogle] Login exitoso para ${googleUser.email}`);
+    console.log('🎉 [postUserGoogle] Login exitoso');
     return res.status(200).json({
       Login: true,
       access_token_expires_at: Date.now() + SECURITY_CONFIG.TOKEN_TTL.ACCESS_TOKEN_MS,
@@ -335,7 +343,7 @@ export const postUserGoogle = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('❌ Error al registrar/login usuario de Google:', error);
+    console.error('❌ Error al registrar/login usuario de Google');
     return res.status(401).json({
       message: 'Token de Google inválido',
     });
@@ -447,6 +455,8 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
     profile_photo,
   } = req.body;
 
+  let uploadedAvatarUrl: string | undefined;
+
   try {
     const currentUser = await prisma.users.findUnique({
       where: { id: currentUserId },
@@ -498,7 +508,18 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
     }
 
     const dataToUpdate: any = {};
-    const uploadedAvatarFileName = req.file?.filename;
+
+    if (req.file?.buffer) {
+      const extension = req.file.mimetype.split('/')[1] || 'jpg';
+      const objectKey = `images/avatars/avatar-${Date.now()}-${Math.round(
+        Math.random() * 1e9
+      )}.${extension}`;
+      uploadedAvatarUrl = await uploadObject({
+        key: objectKey,
+        body: req.file.buffer,
+        contentType: req.file.mimetype,
+      });
+    }
 
     if (full_name !== undefined) dataToUpdate.full_name = full_name;
     if (apodo !== undefined) dataToUpdate.apodo = apodo;
@@ -526,8 +547,8 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
     if (phone !== undefined) dataToUpdate.phone = phone;
     if (address !== undefined) dataToUpdate.address = address;
     if (reference !== undefined) dataToUpdate.reference = reference;
-    if (uploadedAvatarFileName) {
-      dataToUpdate.profile_photo = uploadedAvatarFileName;
+    if (uploadedAvatarUrl) {
+      dataToUpdate.profile_photo = uploadedAvatarUrl;
     } else if (profile_photo !== undefined) {
       dataToUpdate.profile_photo = profile_photo;
     }
@@ -539,7 +560,7 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
 
     const updatedUser = await actualizarUser(currentUserId, dataToUpdate);
 
-    if (uploadedAvatarFileName) {
+    if (uploadedAvatarUrl) {
       await removeAvatarFile(currentUser?.profile_photo);
     }
 
@@ -548,8 +569,8 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
       message: 'Perfil actualizado exitosamente',
     });
   } catch (error) {
-    if (req.file?.filename) {
-      await removeAvatarFile(req.file.filename);
+    if (uploadedAvatarUrl) {
+      await removeAvatarFile(uploadedAvatarUrl);
     }
 
     console.error('Error al actualizar perfil:', error);

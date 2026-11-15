@@ -33,9 +33,9 @@ const char* ssid = "TU_WIFI_SSID";
 const char* password = "TU_WIFI_PASSWORD";
 
 // Línea 24-26: Backend y API Key
-const char* BACKEND_IP = "192.168.1.XXX";  // ⬅️ IP de tu PC donde corre el backend
+const char* BACKEND_IP = "10.0.0.XXX";  // ⬅️ IP de tu PC donde corre el backend
 const int BACKEND_PORT = 3005;
-const char* API_KEY = "maestro-rf24-secret-key"; // 🔑 Debe coincidir con .env
+const char* API_KEY = "TU_API_KEY_LARGA_Y_ALEATORIA"; // 🔑 Debe coincidir con .env
 ```
 
 ### 3. Configurar el Backend (.env)
@@ -43,7 +43,7 @@ const char* API_KEY = "maestro-rf24-secret-key"; // 🔑 Debe coincidir con .env
 Asegúrate de que tu archivo `.env` contenga:
 
 ```env
-ARDUINO_API_KEY=maestro-rf24-secret-key
+ARDUINO_API_KEY=TU_API_KEY_LARGA_Y_ALEATORIA
 ```
 
 ⚠️ **IMPORTANTE**: El valor de `API_KEY` en Arduino debe ser **EXACTAMENTE** el mismo que `ARDUINO_API_KEY` en `.env`
@@ -59,7 +59,7 @@ ipconfig | findstr IPv4
 **Busca algo como:**
 
 ```
-IPv4 Address. . . . . . . . . . : 192.168.1.100
+IPv4 Address. . . . . . . . . . : 10.0.0.100
 ```
 
 ⚠️ **IMPORTANTE**: Usa esa IP en `BACKEND_IP`
@@ -80,9 +80,9 @@ Deberías ver:
 🔧 SETUP MAESTRO RF24 v2.0
 ================================
 📶 Conectando WiFi... ✅
-🔗 IP Local: 192.168.1.30
-🔗 Backend: http://192.168.1.100:3005
-🔑 API Key: maestro-rf24-secret-key
+🔗 IP Local: 10.0.0.30
+🔗 Backend: http://10.0.0.100:3005
+🔑 API Key: TU_API_KEY_LARGA_Y_ALEATORIA
 📡 Inicializando NRF24... ✅
 
 🌐 Web Server iniciando...
@@ -106,7 +106,7 @@ Deberías ver:
    ↳ Estado: on
 
 📤 MAESTRO: Enviando comando
-   ↳ URL: http://192.168.4.30:80/on?n=3
+   ↳ URL: http://10.0.0.30:80/on?n=3
 ✅ MAESTRO: Respuesta 200
 ✅ Alarma actualizada: ALM-JC-0003-L4 → ON
 
@@ -130,7 +130,7 @@ Deberías ver:
   ↳ Intento 3/3...
   ❌ Falló tras 3 intentos - Nodo no responde
   📡 Reportando fallo al backend...
-     URL: http://192.168.1.100:3005/api/nodes/failure
+     URL: http://10.0.0.100:3005/api/nodes/failure
      Payload: {"nodeId":3,"comando":"ON","intentos":3}
      ✅ Fallo reportado exitosamente
 
@@ -163,7 +163,7 @@ Deberías ver:
   ↳ Intento 1/3...
   ✅ ACK recibido - Nodo respondió
   📡 Reportando recuperación al backend...
-     URL: http://192.168.1.100:3005/api/nodes/recovery
+     URL: http://10.0.0.100:3005/api/nodes/recovery
      Payload: {"nodeId":3,"comando":"OFF"}
      ✅ Recuperación reportada exitosamente
 
@@ -244,13 +244,13 @@ Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
 1. Verifica que `.env` contenga:
 
    ```env
-   ARDUINO_API_KEY=maestro-rf24-secret-key
+   ARDUINO_API_KEY=TU_API_KEY_LARGA_Y_ALEATORIA
    ```
 
 2. Verifica que el Arduino tenga:
 
    ```cpp
-   const char* API_KEY = "maestro-rf24-secret-key";
+   const char* API_KEY = "TU_API_KEY_LARGA_Y_ALEATORIA";
    ```
 
 3. Reinicia el backend:
@@ -269,7 +269,7 @@ Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
 ```http
 POST http://localhost:3005/api/nodes/failure
 Content-Type: application/json
-x-api-key: maestro-rf24-secret-key
+x-api-key: TU_API_KEY_LARGA_Y_ALEATORIA
 
 {
   "nodeId": 3,
@@ -335,7 +335,7 @@ Con esta implementación:
 │  Backend    │
 │  (Node.js)  │
 └─────┬───────┘
-      │ HTTP GET: http://192.168.4.30/on?n=3
+      │ HTTP GET: http://10.0.0.30/on?n=3
       v
 ┌─────────────┐
 │  Maestro    │
@@ -388,7 +388,7 @@ Con esta implementación:
   ↳ Intento 3/3...
   ❌ Falló tras 3 intentos - Nodo no responde
   📡 Reportando fallo al backend...
-     URL: http://192.168.1.100:3005/api/nodes/failure
+     URL: http://10.0.0.100:3005/api/nodes/failure
      Payload: {"nodeId":3,"comando":"ON","intentos":3}
      ✅ Fallo reportado exitosamente
 ```

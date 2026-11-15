@@ -71,7 +71,8 @@ export class LandingPage {
       return;
     }
 
-    const seenLanding = localStorage.getItem(this.nativeLandingSeenKey) === 'true';
+    const seenLanding =
+      localStorage.getItem(this.nativeLandingSeenKey) === 'true';
 
     if (seenLanding) {
       this.router.navigate(['/auth/login'], { replaceUrl: true });
@@ -84,7 +85,10 @@ export class LandingPage {
   private redirectByRole(role: string) {
     const normalizedRole = role.toUpperCase();
 
-    if (normalizedRole === APP_ROLES.ADMIN || normalizedRole === APP_ROLES.MASTER) {
+    if (
+      normalizedRole === APP_ROLES.ADMIN ||
+      normalizedRole === APP_ROLES.MASTER
+    ) {
       this.router.navigate(['/administrator/principal-administrador'], {
         replaceUrl: true,
       });

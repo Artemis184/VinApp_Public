@@ -72,6 +72,57 @@ export const requireAdmin = async (req: AuthRequest, res: Response, next: NextFu
 };
 
 /**
+ * Permite el acceso solo si el usuario autenticado es el dueño del recurso
+ * (su user_uuid coincide con el parámetro de ruta indicado) o si es ADMIN/MASTER.
+ * Uso:
+ * router.get('/getnodesbyuserid/:user_id', verifyToken, requireSelfOrAdmin('user_id'), ctrl)
+ */
+export const requireSelfOrAdmin = (paramName: string) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user || !req.user.user_uuid) {
+        return res.status(401).json({ message: 'Usuario no autenticado' });
+      }
+
+      const rawParam = (req.params as Record<string, string | string[]>)[paramName];
+      const targetId = Array.isArray(rawParam) ? rawParam[0] : rawParam;
+
+      // Dueño del recurso
+      if (targetId && targetId === req.user.user_uuid) {
+        return next();
+      }
+
+      // ADMIN por token
+      if (req.user.role === ROLE_NAMES.ADMIN) {
+        return next();
+      }
+
+      // MASTER (por token o por DB para tokens antiguos)
+      if (req.user.is_master === true) {
+        return next();
+      }
+
+      if (req.user.is_master === undefined) {
+        const user = await prisma.users.findUnique({
+          where: { id: req.user.user_uuid },
+          select: { is_master: true },
+        });
+        if (user?.is_master === true) {
+          return next();
+        }
+      }
+
+      return res.status(403).json({
+        message: 'No tienes permisos para acceder a este recurso',
+      });
+    } catch (error) {
+      console.error('Error en requireSelfOrAdmin middleware:', error);
+      return res.status(500).json({ message: 'Error al verificar permisos' });
+    }
+  };
+};
+
+/**
  * Middleware genérico para autorizar por roles
  * Uso:
  * router.post('/x', verifyToken, authorizeRoles(['Admin','SuperAdmin']), controller)

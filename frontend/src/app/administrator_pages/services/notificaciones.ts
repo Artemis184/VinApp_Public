@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { appLogger } from 'src/app/core/logger.service';
 
 export interface Notificacion {
   tipo: 'DATOS_MODIFICADOS' | 'ESTADO_CAMBIADO' | 'ALARMAS_MODIFICADAS';
@@ -17,7 +18,7 @@ export class Notificaciones {
   constructor() {}
 
   async notificarUsuario(notificacion: Notificacion): Promise<boolean> {
-    console.log('📧 Notificando al usuario:', notificacion);
+    appLogger.log('Notificación de usuario encolada');
 
     this.notificacionesPendientes.push(notificacion);
 

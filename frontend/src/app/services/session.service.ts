@@ -1,11 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { SecureStorageService } from './secure-storage.service';
-import { SESSION_CONFIG, AUTH_STORAGE, AUTH_HTTP } from 'src/constants/app.constants';
+import {
+  SESSION_CONFIG,
+  AUTH_STORAGE,
+  AUTH_HTTP,
+} from 'src/constants/app.constants';
 import { SessionData, UserData } from '../interfaces/session.interface';
 import { Device } from '@capacitor/device';
 import { Capacitor, CapacitorCookies } from '@capacitor/core';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Injectable({
   providedIn: 'root',
@@ -62,7 +67,7 @@ export class SessionService {
         const raw = localStorage.getItem(AUTH_STORAGE.SESSION_DATA);
         finalSession = raw ? JSON.parse(raw) : null;
       } catch (error) {
-        console.error('Error parseando sesión desde localStorage:', error);
+        appLogger.error('Error parseando sesión desde localStorage');
       }
     }
 
@@ -203,7 +208,7 @@ export class SessionService {
         path: '/',
       });
     } catch (error) {
-      console.warn('No se pudo sincronizar la cookie CSRF nativa:', error);
+      appLogger.warn('No se pudo sincronizar la cookie CSRF nativa');
     }
   }
 

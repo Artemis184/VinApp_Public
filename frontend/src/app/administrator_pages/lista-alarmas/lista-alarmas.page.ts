@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Alarmas, Alarma } from 'src/app/administrator_pages/services/alarmas';
 import { AdminBackHeaderComponent } from 'src/app/shared/admin-back-header/admin-back-header.component';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   selector: 'app-lista-alarmas',
@@ -74,7 +75,7 @@ export class ListaAlarmasPage implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error al cargar alarmas:', error);
+          appLogger.error('Error al cargar alarmas');
           this.errorMessage = 'Error al cargar las alarmas';
           this.isLoading = false;
         },
@@ -94,6 +95,6 @@ export class ListaAlarmasPage implements OnInit, OnDestroy {
   }
 
   obtenerDireccion(alarma: Alarma): string {
-    return alarma.rf_address || alarma.description || 'Sin dirección asignada';
+    return alarma.description || alarma.location || 'Sin dirección asignada';
   }
 }

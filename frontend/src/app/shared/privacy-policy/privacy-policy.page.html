@@ -14,7 +14,7 @@
       <h1>Política de Privacidad de VinApp</h1>
       <p class="last-update">
         <ion-icon name="calendar-outline"></ion-icon>
-        Última actualización: 15 de enero de 2026
+        Última actualización: 11 de septiembre de 2026
       </p>
     </div>
 
@@ -37,8 +37,10 @@
       </ion-card-header>
       <ion-card-content>
         <p>
-          Cuando un usuario inicia sesión en VinApp utilizando su cuenta de
-          Google, recopilamos únicamente la siguiente información básica:
+          VinApp recopila la información necesaria para crear y proteger una
+          cuenta, prestar sus funciones comunitarias y administrar las alarmas y
+          nodos conectados. Algunos datos son proporcionados por el usuario y
+          otros se generan durante la autenticación y el uso de la aplicación.
         </p>
         <div class="list-items">
           <div class="list-item">
@@ -57,11 +59,36 @@
             <ion-icon name="key" color="primary"></ion-icon>
             <span>Identificador de cuenta de Google (Google ID)</span>
           </div>
+          <div class="list-item">
+            <ion-icon name="lock-closed" color="primary"></ion-icon>
+            <span>Credenciales de cuenta y códigos de recuperación</span>
+          </div>
+          <div class="list-item">
+            <ion-icon name="call" color="primary"></ion-icon>
+            <span>Número de teléfono</span>
+          </div>
+          <div class="list-item">
+            <ion-icon name="home" color="primary"></ion-icon>
+            <span>Dirección y referencia domiciliaria</span>
+          </div>
+          <div class="list-item">
+            <ion-icon name="phone-portrait" color="primary"></ion-icon>
+            <span>Identificador técnico del dispositivo</span>
+          </div>
+          <div class="list-item">
+            <ion-icon name="pulse" color="primary"></ion-icon>
+            <span>Datos de alarmas, nodos, estados y auditoría</span>
+          </div>
+          <div class="list-item">
+            <ion-icon name="image" color="primary"></ion-icon>
+            <span>Imágenes de perfil e imágenes asociadas a nodos</span>
+          </div>
         </div>
         <p class="note">
-          Adicionalmente, el usuario puede proporcionar información opcional
-          dentro de la aplicación, como número de teléfono u otros datos de
-          contacto, únicamente con fines comunitarios.
+          Las contraseñas se transmiten para crear o cambiar la cuenta y deben
+          ser protegidas por el servidor. Los tokens de sesión y el token CSRF
+          se procesan para mantener la sesión y prevenir solicitudes no
+          autorizadas; no se muestran intencionalmente en la interfaz.
         </p>
       </ion-card-content>
     </ion-card>
@@ -97,6 +124,16 @@
               aplicación</span
             >
           </div>
+          <div class="list-item">
+            <ion-icon name="checkmark-circle" color="success"></ion-icon>
+            <span
+              >Gestionar alarmas, nodos, estados y registros de auditoría</span
+            >
+          </div>
+          <div class="list-item">
+            <ion-icon name="checkmark-circle" color="success"></ion-icon>
+            <span>Permitir recuperación y cambio de contraseña</span>
+          </div>
         </div>
       </ion-card-content>
     </ion-card>
@@ -110,8 +147,12 @@
       </ion-card-header>
       <ion-card-content>
         <p class="highlight-text">
-          VinApp no vende, alquila ni comparte la información personal de los
-          usuarios con terceros, salvo cuando sea requerido por ley.
+          VinApp no vende ni alquila información personal. Los datos se
+          transmiten al backend de VinApp para prestar el servicio y pueden
+          procesarse mediante proveedores necesarios para la autenticación,
+          infraestructura y operación técnica, como Google Sign-In. También
+          pueden comunicarse cuando lo exija la ley o sea necesario para
+          proteger la seguridad del servicio.
         </p>
       </ion-card-content>
     </ion-card>
@@ -125,9 +166,13 @@
       </ion-card-header>
       <ion-card-content>
         <p>
-          Los datos se almacenan de forma segura en sistemas protegidos y se
-          aplican medidas técnicas razonables para evitar accesos no
-          autorizados, pérdidas o alteraciones de la información.
+          La aplicación transmite sus solicitudes al backend configurado de
+          VinApp mediante HTTPS. En el dispositivo se guardan datos de sesión y
+          un identificador técnico para restaurar la sesión y aplicar controles
+          de seguridad. Se aplican medidas técnicas razonables para evitar
+          accesos no autorizados, pérdidas o alteraciones. El código de esta
+          aplicación no permite confirmar por sí solo los plazos de conservación
+          del backend; para conocerlos, contacte al responsable.
         </p>
       </ion-card-content>
     </ion-card>
@@ -144,15 +189,17 @@
           <div class="list-item">
             <ion-icon name="checkmark-circle" color="tertiary"></ion-icon>
             <span
-              >VinApp utiliza Google Sign-In únicamente para la autenticación de
-              usuarios.</span
+              >VinApp utiliza Google Sign-In como una opción de autenticación.
+              Google puede proporcionar el identificador de cuenta, correo,
+              nombre e imagen de perfil autorizados por el usuario.</span
             >
           </div>
           <div class="list-item">
             <ion-icon name="checkmark-circle" color="tertiary"></ion-icon>
             <span
-              >No accedemos a servicios adicionales de Google ni a información
-              sensible más allá de los datos básicos del perfil.</span
+              >El token de identidad recibido de Google se transmite al backend
+              para validar el inicio de sesión. VinApp no solicita acceso a
+              servicios adicionales de Google desde esta aplicación.</span
             >
           </div>
         </div>
@@ -220,7 +267,7 @@
           <ion-icon name="mail" color="primary"></ion-icon>
           <div>
             <strong>Correo de contacto</strong>
-            <p>barriojimmycandell1997@gmail.com</p>
+            <p>contacto@ejemplo.com</p>
           </div>
         </div>
       </ion-card-content>

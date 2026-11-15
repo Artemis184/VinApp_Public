@@ -52,6 +52,7 @@
 
     <div class="google-login-container">
       <ion-button
+        *ngIf="isNativeApp"
         expand="block"
         fill="outline"
         class="google-native-btn"
@@ -63,13 +64,9 @@
       </ion-button>
 
       <p class="google-status google-native-status">
-        {{
-          isNativeApp
-            ? 'En la app, Google abre en el navegador del sistema.'
-            : !googleButtonReady && !googleButtonError
-              ? 'Cargando acceso con Google...'
-              : 'Usa el botón oficial de Google si aparece abajo.'
-        }}
+        {{ isNativeApp ? 'Inicio nativo con Google.' : !googleButtonReady &&
+        !googleButtonError ? 'Cargando acceso con Google...' : 'Usa el botón
+        oficial de Google si aparece abajo.' }}
       </p>
 
       <div id="googleBtn" *ngIf="!isNativeApp"></div>

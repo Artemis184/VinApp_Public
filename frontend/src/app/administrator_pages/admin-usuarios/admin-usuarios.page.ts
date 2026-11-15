@@ -15,6 +15,8 @@ import {
   IonInput,
   IonSelect,
   IonSelectOption,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { Subject, firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -29,6 +31,7 @@ import {
   getEstadoUsuarioColor,
   USUARIO_ESTADOS,
 } from 'src/constants/app.constants';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -51,6 +54,8 @@ import {
     IonInput,
     IonSelect,
     IonSelectOption,
+    IonRefresher,
+    IonRefresherContent,
   ],
 })
 export class AdminUsuariosPage implements OnDestroy {
@@ -101,22 +106,30 @@ export class AdminUsuariosPage implements OnDestroy {
     this.recuperarUsuarios();
   }
 
-  recuperarUsuarios() {
+  async recuperarUsuarios(): Promise<void> {
     this.cargando = true;
 
-    this.adminUsuarios.getUsuarios().subscribe({
-      next: (data) => {
-        this.usuarios = data;
-        this.aplicarFiltros();
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar usuarios:', err);
-        this.usuarios = [];
-        this.usuariosFiltrados = [];
-        this.cargando = false;
-      },
-    });
+    try {
+      const data = await firstValueFrom(this.adminUsuarios.getUsuarios());
+
+      this.usuarios = data;
+      this.aplicarFiltros();
+    } catch (error) {
+      appLogger.error('Error al cargar usuarios');
+
+      this.usuarios = [];
+      this.usuariosFiltrados = [];
+    } finally {
+      this.cargando = false;
+    }
+  }
+
+  async handleRefresh(event: any): Promise<void> {
+    try {
+      await this.recuperarUsuarios();
+    } finally {
+      event.target.complete();
+    }
   }
 
   /**
@@ -240,7 +253,7 @@ export class AdminUsuariosPage implements OnDestroy {
         }
       }
     } catch (err) {
-      console.error('Error al abrir detalle:', err);
+      appLogger.error('Error al abrir detalle');
     }
   }
 }

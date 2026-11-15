@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const MAESTRO_IP = process.env.MAESTRO_IP || '192.168.4.30';
+const MAESTRO_IP = process.env.MAESTRO_IP || '10.0.0.30';
 const MAESTRO_PORT = process.env.MAESTRO_PORT || 80;
 const MAESTRO_BASE_URL = `http://${MAESTRO_IP}:${MAESTRO_PORT}`;
 

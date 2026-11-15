@@ -5,7 +5,7 @@
 Se ha reemplazado el endpoint REST `PATCH /nodes/:id/alarm/:state` con un sistema **WebSocket en tiempo real** que mantiene toda la arquitectura existente:
 
 ✅ **Auditoria de usuario** (audit_user_actions)  
-✅ **Comunicación con maestro ESP8266** (192.168.4.30)  
+✅ **Comunicación con maestro ESP8266** (10.0.0.30)  
 ✅ **Broadcast en tiempo real** a todos los clientes  
 ✅ **Validación de usuario y nodo**  
 ✅ **Sin romper REST administrativo existente**
@@ -21,8 +21,8 @@ Frontend (Cliente WebSocket)
 Backend (Node.js + Socket.IO)
     ├─ 1️⃣ Verifica JWT del usuario
     ├─ 2️⃣ Valida que nodo exista y esté habilitado
-    ├─ 3️⃣ Envía HTTP al maestro ESP8266 (192.168.4.30)
-    │   └─ GET http://192.168.4.30/on?n=1  (o /off)
+    ├─ 3️⃣ Envía HTTP al maestro ESP8266 (10.0.0.30)
+    │   └─ GET http://10.0.0.30/on?n=1  (o /off)
     ├─ 4️⃣ Registra en BD: audit_user_actions
     │   └─ action_type: ALARM_ON | ALARM_OFF
     │   └─ metadata: {action, source: 'websocket'}
@@ -30,7 +30,7 @@ Backend (Node.js + Socket.IO)
     │   └─ io.emit('node:alarm:state', {...})
     └─ 6️⃣ Responde al cliente con confirmación
         ↓
-Maestro ESP8266 (192.168.4.30)
+Maestro ESP8266 (10.0.0.30)
     └─ RF24 controla ON/OFF de nodos (1-5)
 ```
 
@@ -61,7 +61,7 @@ Añade a tu `.env` (opcional, con defaults):
 
 ```env
 # Maestro ESP8266
-MAESTRO_IP=192.168.4.30
+MAESTRO_IP=10.0.0.30
 MAESTRO_PORT=80
 ```
 
@@ -99,7 +99,7 @@ socket.emit('node:alarm:set', {
   nodeId: 1, // number (1-5)
   state: 'on', // 'on' | 'off'
   method: 'wifi', // opcional: 'rf' | 'wifi'
-  wifiEndpoint: 'http://192.168.18.2/cmd', // opcional (solo wifi)
+  wifiEndpoint: 'http://10.0.0.2/cmd', // opcional (solo wifi)
 });
 ```
 
@@ -263,8 +263,8 @@ socket.emit('node:alarm:set', { nodeId: 1, state: 'on' });
 Código que espera:
 
 ```cpp
-// GET http://192.168.4.30/on?n=1  → Enciende nodo 1
-// GET http://192.168.4.30/off?n=1 → Apaga nodo 1
+// GET http://10.0.0.30/on?n=1  → Enciende nodo 1
+// GET http://10.0.0.30/off?n=1 → Apaga nodo 1
 ```
 
 Si el servidor no responde en 5 segundos, se retorna error.

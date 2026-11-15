@@ -785,9 +785,6 @@
                 "ip_address": {
                   "example": "any"
                 },
-                "rf_address": {
-                  "example": "any"
-                },
                 "rf_slot": {
                   "example": "any"
                 },
@@ -1190,6 +1187,179 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/nodes/health": {
+      "post": {
+        "tags": [
+          "Nodes"
+        ],
+        "description": "Registra reporte de salud de un nodo hijo (requiere API Key)",
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nodeId": {
+                  "example": "any"
+                },
+                "code": {
+                  "example": "any"
+                },
+                "rfNode": {
+                  "example": "any"
+                },
+                "radioReinits": {
+                  "example": "any"
+                },
+                "boots": {
+                  "example": "any"
+                },
+                "rxCount": {
+                  "example": "any"
+                },
+                "uptimeHours": {
+                  "example": "any"
+                },
+                "abnormalReset": {
+                  "example": "any"
+                },
+                "reinitThisSession": {
+                  "example": "any"
+                },
+                "viaRepeater": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/nodes/health/summary": {
+      "get": {
+        "tags": [
+          "Nodes"
+        ],
+        "description": "Ultimo estado de salud de cada nodo + delta de 7 dias",
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/nodes/{id}/health": {
+      "get": {
+        "tags": [
+          "Nodes"
+        ],
+        "description": "Historial de salud de un nodo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"

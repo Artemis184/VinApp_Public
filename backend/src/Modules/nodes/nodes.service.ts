@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { notifyNodeStateChange } from '../../services/telegram.service';
 
 const prisma = new PrismaClient();
 
@@ -115,10 +116,29 @@ export const actualizarNodo = async (
   }
 ) => {
   try {
+    const previousNode = await prisma.nodes.findUnique({
+      where: { id },
+      select: {
+        name: true,
+        code: true,
+        is_online: true,
+        is_alarm_on: true,
+        is_enabled: true,
+      },
+    });
+
     const node_Actualizado = await prisma.nodes.update({
       where: { id },
       data,
     });
+
+    if (previousNode) {
+      await notifyNodeStateChange(node_Actualizado, {
+        online: previousNode.is_online !== node_Actualizado.is_online,
+        alarm: previousNode.is_alarm_on !== node_Actualizado.is_alarm_on,
+        enabled: previousNode.is_enabled !== node_Actualizado.is_enabled,
+      });
+    }
 
     return node_Actualizado;
   } catch (error) {
@@ -130,10 +150,7 @@ export const actualizarNodo = async (
 export const eliminarNodo = async (id: number) => {
   //ahora en ves de eliminar lo deshabilite
   try {
-    return await prisma.nodes.update({
-      where: { id },
-      data: { is_enabled: false },
-    });
+    return await actualizarNodo(id, { is_enabled: false });
   } catch (error) {
     console.error('Error al deshabilitar nodo:', error);
     throw new Error('Error al deshabilitar nodo', { cause: error });
@@ -142,12 +159,125 @@ export const eliminarNodo = async (id: number) => {
 
 export const nodoEnabled = async (id: number, is_enabled: boolean) => {
   try {
-    return await prisma.nodes.update({
-      where: { id },
-      data: { is_enabled },
-    });
+    return await actualizarNodo(id, { is_enabled });
   } catch (error) {
     console.error('Error al cambiar is_enabled del nodo:', error);
     throw new Error('Error al cambiar is_enabled del nodo', { cause: error });
+  }
+};
+
+/* =========================
+   SALUD DE NODOS
+========================= */
+
+export const crearRegistroSalud = async (data: {
+  node_id: number;
+  rf_node: number;
+  radio_reinits: number;
+  boots: number;
+  rx_count: number;
+  uptime_hours: number;
+  abnormal_reset: boolean;
+  reinit_this_session: boolean;
+  via_repeater?: string | null;
+}) => {
+  try {
+    return await prisma.node_health_logs.create({ data });
+  } catch (error) {
+    console.error('Error al crear registro de salud:', error);
+    throw new Error('Error al crear registro de salud', { cause: error });
+  }
+};
+
+export const obtenerUltimaSalud = async (nodeId: number) => {
+  try {
+    return await prisma.node_health_logs.findFirst({
+      where: { node_id: nodeId },
+      orderBy: { recorded_at: 'desc' },
+    });
+  } catch (error) {
+    console.error('Error al obtener ultima salud:', error);
+    throw new Error('Error al obtener ultima salud', { cause: error });
+  }
+};
+
+export const obtenerNodoPorSlotRF = async (rfSlot: number) => {
+  try {
+    return await prisma.nodes.findFirst({
+      where: { rf_slot: rfSlot },
+    });
+  } catch (error) {
+    console.error('Error al obtener nodo por slot RF:', error);
+    throw new Error('Error al obtener nodo por slot RF', { cause: error });
+  }
+};
+export const obtenerHistorialSalud = async (
+  nodeId: number,
+  opciones: { limit?: number; days?: number } = {}
+) => {
+  const limit = Math.min(opciones.limit ?? 100, 500);
+  const days = opciones.days ?? 30;
+  const desde = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  try {
+    return await prisma.node_health_logs.findMany({
+      where: {
+        node_id: nodeId,
+        recorded_at: { gte: desde },
+      },
+      orderBy: { recorded_at: 'desc' },
+      take: limit,
+    });
+  } catch (error) {
+    console.error('Error al obtener historial de salud:', error);
+    throw new Error('Error al obtener historial de salud', { cause: error });
+  }
+};
+/**
+ * Resumen de salud de un nodo en una ventana de dias.
+ *
+ * Devuelve el DELTA de reinicios en la ventana, no el
+ * absoluto: el absoluto arrastra historia vieja y no dice
+ * nada sobre como esta el nodo ahora.
+ */
+export const obtenerResumenSaludNodo = async (nodeId: number, days = 7) => {
+  const desde = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  try {
+    const [ultimo, primeroVentana, anormalesVentana] = await Promise.all([
+      prisma.node_health_logs.findFirst({
+        where: { node_id: nodeId },
+        orderBy: { recorded_at: 'desc' },
+      }),
+      prisma.node_health_logs.findFirst({
+        where: { node_id: nodeId, recorded_at: { gte: desde } },
+        orderBy: { recorded_at: 'asc' },
+      }),
+      prisma.node_health_logs.count({
+        where: {
+          node_id: nodeId,
+          abnormal_reset: true,
+          recorded_at: { gte: desde },
+        },
+      }),
+    ]);
+    return { ultimo, primeroVentana, anormalesVentana };
+  } catch (error) {
+    console.error('Error al obtener resumen de salud:', error);
+    throw new Error('Error al obtener resumen de salud', { cause: error });
+  }
+};
+export const purgarSaludAntigua = async (days = 90) => {
+  const limite = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  try {
+    // Los reinicios anormales se conservan: son pocos y son
+    // justo los que vas a querer mirar cuando algo raro pase.
+    return await prisma.node_health_logs.deleteMany({
+      where: {
+        recorded_at: { lt: limite },
+        abnormal_reset: false,
+      },
+    });
+  } catch (error) {
+    console.error('Error al purgar salud antigua:', error);
+    throw new Error('Error al purgar salud antigua', { cause: error });
   }
 };

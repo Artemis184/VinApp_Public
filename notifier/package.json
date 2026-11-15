@@ -1,0 +1,29 @@
+{
+  "name": "vinapp-notifier",
+  "version": "1.0.0",
+  "description": "Servicio independiente de notificaciones (Telegram) de VinApp",
+  "private": true,
+  "author": "ArtemisNet",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.10.9",
+    "prettier": "^3.7.4",
+    "tsx": "^4.23.12",
+    "typescript": "^5.8.3"
+  }
+}

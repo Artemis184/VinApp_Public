@@ -1,4 +1,5 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   IonHeader,
@@ -13,8 +14,10 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/services/auth.service';
 import { ModalController } from '@ionic/angular/standalone';
 import { MenuGeneralComponent } from 'src/app/shared/menu-general/menu-general.component';
+import { MenuGeneralProfileService } from 'src/app/shared/menu-general/services/menu-general-profile.service';
 import { APP_ROLES, AUTH_STORAGE } from 'src/constants/app.constants';
 import { MenuGeneralUserInput } from '../menu-general/interfaces/datos_usuario.interface';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -44,15 +47,52 @@ export class AdminBackHeaderComponent {
 
   /** Control popup usuario */
   userMenuOpen = false;
+  avatarUrl: string | null = null;
+  avatarLoadError = false;
 
   /** Router para navegación */
   private router = inject(Router);
   private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
+  private profileService = inject(MenuGeneralProfileService);
   private modalCtrl = inject(ModalController);
   private readonly homeRoutes = {
     admin: '/administrator/principal-administrador',
     finalUser: '/final-user/principal-usuariof',
   } as const;
+
+  constructor() {
+    void this.cargarAvatar();
+    this.authService.userData$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => void this.cargarAvatar());
+  }
+
+  private async cargarAvatar() {
+    const rawUser = localStorage.getItem(AUTH_STORAGE.USER);
+
+    try {
+      const user = rawUser ? JSON.parse(rawUser) : null;
+      const profilePhoto = user?.profile_photo || user?.foto || null;
+      this.avatarUrl = typeof profilePhoto === 'string' ? profilePhoto : null;
+
+      const response = await firstValueFrom(this.profileService.getMyProfile());
+      const profile = response?.data;
+      if (profile) {
+        this.avatarUrl =
+          profile.profile_photo ||
+          (profile.avatar_base64 && profile.avatar_mime_type
+            ? `data:${profile.avatar_mime_type};base64,${profile.avatar_base64}`
+            : null);
+      }
+    } catch {
+      this.avatarUrl = null;
+    }
+  }
+
+  onAvatarError() {
+    this.avatarLoadError = true;
+  }
 
   toggleUserMenu() {
     this.userMenuOpen = !this.userMenuOpen;
@@ -71,6 +111,13 @@ export class AdminBackHeaderComponent {
     });
 
     await modal.present();
+    const result = await modal.onDidDismiss<{
+      avatarUrl?: string | null;
+    }>();
+    if (result.data && 'avatarUrl' in result.data) {
+      this.avatarUrl = result.data.avatarUrl || null;
+      this.avatarLoadError = false;
+    }
   }
 
   goHome() {

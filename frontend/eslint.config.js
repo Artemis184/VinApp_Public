@@ -6,7 +6,16 @@ import angular from "angular-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/.angular/**", "**/node_modules/**", "**/www/**", "**/dist/**", "**/*.d.ts", "**/index.html"],
+        ignores: [
+      'android/**',
+      'ios/**',
+      'node_modules/**',
+      'dist/**',
+      'www/**',
+      '.angular/**',
+      'src/environments/environment.d.ts',
+
+    ],
   },
   {
     files: ["**/*.ts"],

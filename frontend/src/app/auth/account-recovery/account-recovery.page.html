@@ -11,10 +11,10 @@
       <div class="custom-input-container">
         <ion-input
           type="email"
-          placeholder="Introduce tu correo"
+          label="Correo electrónico"
+          label-placement="stacked"
           [(ngModel)]="email"
           class="custom-input"
-          label-placement="floating"
         >
         </ion-input>
       </div>
@@ -51,7 +51,8 @@
         <ion-input
           type="tel"
           inputmode="numeric"
-          placeholder="Código de 6 dígitos"
+          label="Código de 6 dígitos"
+          label-placement="stacked"
           [(ngModel)]="inputCode"
           (ionInput)="validateOnlyNumbers($event)"
           maxlength="6"

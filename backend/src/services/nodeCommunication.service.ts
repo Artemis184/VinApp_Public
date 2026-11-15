@@ -25,7 +25,7 @@ interface SendNodeCommandResult {
 
 const NODE_COMM_MODE = (process.env.NODE_COMM_MODE || 'rf').toLowerCase();
 const NODE_WIFI_ENDPOINT = process.env.NODE_WIFI_ENDPOINT || '';
-const NODE_WIFI_SHARED_TOKEN = parseToken(process.env.NODE_WIFI_SHARED_TOKEN || '0xCHANGE_ME');
+const NODE_WIFI_SHARED_TOKEN = parseToken(process.env.NODE_WIFI_SHARED_TOKEN || '0x0');
 
 const CMD_OFF = 0;
 const CMD_ON = 1;
@@ -38,7 +38,7 @@ function parseToken(raw: string): number {
     : Number.parseInt(normalized, 10);
 
   if (Number.isNaN(parsed)) {
-    return 0;
+    return 0x0;
   }
 
   return parsed >>> 0;
@@ -50,7 +50,7 @@ function looksLikeWifiAddress(value: string): boolean {
   if (!trimmed) return false;
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return true;
 
-  // IPv4 simple: 192.168.18.2 o con puerto/ruta
+  // IPv4 simple: 10.0.0.2 o con puerto/ruta
   if (/^(\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(trimmed)) {
     return true;
   }

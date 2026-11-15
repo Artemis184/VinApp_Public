@@ -13,7 +13,16 @@
     <!-- USER ICON -->
     <ion-buttons slot="end" *ngIf="showUserMenu">
       <ion-button (click)="toggleUserMenu()">
-        <ion-icon name="person-circle"></ion-icon>
+        <img
+          *ngIf="avatarUrl && !avatarLoadError; else defaultAvatar"
+          [src]="avatarUrl"
+          alt="Avatar"
+          class="header-avatar"
+          (error)="onAvatarError()"
+        />
+        <ng-template #defaultAvatar>
+          <ion-icon name="person-circle"></ion-icon>
+        </ng-template>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

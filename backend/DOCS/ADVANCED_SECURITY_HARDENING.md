@@ -381,15 +381,15 @@ Headers:
 ### Test 1: Device metadata binding
 
 ```bash
-# 1. Login desde IP 192.168.1.100
+# 1. Login desde IP 10.0.0.100
 curl -X POST http://localhost:3001/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@test.com","password":"123","deviceId":"phone123"}'
 
 # 2. Extraer refresh_token de cookies
-# 3. Simular request desde IP 192.168.1.101 (IP cambió)
+# 3. Simular request desde IP 10.0.0.101 (IP cambió)
 curl -X POST http://localhost:3001/api/refresh \
-  -H "X-Forwarded-For: 192.168.1.101" \
+  -H "X-Forwarded-For: 10.0.0.101" \
   -d '{"deviceId":"phone123"}'
 
 # ✅ Debe permitir pero loguear: "[SECURITY] Device IP changed"
@@ -439,7 +439,7 @@ done
 ### Log en anomaly:
 
 ```
-[SECURITY] Device IP changed: old=192.168.1.100 new=192.168.1.101
+[SECURITY] Device IP changed: old=10.0.0.100 new=10.0.0.101
 [SECURITY] Device userAgent changed: old=Mozilla... new=Chrome...
 [SECURITY] Rapid IP changes detected. sessionId=12345 changes=3
 [SECURITY] Session 12345 revoked after 5 failed attempts

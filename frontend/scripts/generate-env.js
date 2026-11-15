@@ -19,6 +19,9 @@ if (!fs.existsSync(envDir)) {
 // Función para generar el contenido del environment
 function generateEnvironment(isProduction = false) {
   const apiUrl = process.env.API_URL || 'http://localhost:3000/api';
+  const webUrl = isProduction
+    ? process.env.WEB_URL_PROD || 'https://vinapp.artemisnet.cloud'
+    : process.env.WEB_URL || 'http://localhost:4200';
   const urlLogo = process.env.URL_LOGO || 'https://example.com/logo.png';
   const apiTimeout = process.env.API_TIMEOUT || 60000;
   const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
@@ -30,10 +33,37 @@ function generateEnvironment(isProduction = false) {
 export const environment = {
   production: ${isProduction},
   apiUrl: '${apiUrl}',
+  webUrl: '${webUrl}',
   urlLogo: '${urlLogo}',
   apiTimeout: ${apiTimeout},
   google: {
-    clientId: '${googleClientId}'
+    clientId:
+      '${googleClientId}',
+  },
+};
+`;
+}
+
+function generateTestEnvironment() {
+  const apiUrl =
+    process.env.API_URL_TEST || 'https://testvinback.artemisnet.cloud/api';
+  const webUrl =
+    process.env.WEB_URL_TEST || 'https://testvinapp.artemisnet.cloud';
+  const urlLogo = process.env.URL_LOGO || 'https://example.com/logo.png';
+  const apiTimeout = process.env.API_TIMEOUT || 60000;
+  const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
+
+  return `// Environment used for staging/test builds.
+
+export const environment = {
+  production: false,
+  apiUrl: '${apiUrl}',
+  webUrl: '${webUrl}',
+  urlLogo: '${urlLogo}',
+  apiTimeout: ${apiTimeout},
+  google: {
+    clientId:
+      '${googleClientId}',
   },
 };
 `;
@@ -44,5 +74,11 @@ fs.writeFileSync(path.join(envDir, 'environment.ts'), generateEnvironment(false)
 
 // Generar environment.prod.ts
 fs.writeFileSync(path.join(envDir, 'environment.prod.ts'), generateEnvironment(true));
+
+// Generar environment.test.ts
+fs.writeFileSync(
+  path.join(envDir, 'environment.test.ts'),
+  generateTestEnvironment(),
+);
 
 console.log('Environments generated from .env');

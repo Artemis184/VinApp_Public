@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 
 const notifyPendingStatusEmail = (userId: string, emailForLogs: string) => {
   sendStatusEmail(userId, user_status.PENDING).catch((error) => {
-    console.error(`Error al enviar email de estado PENDING a ${emailForLogs}:`, error);
+    console.error('Error al enviar email de estado PENDING:', error?.message);
   });
 };
 

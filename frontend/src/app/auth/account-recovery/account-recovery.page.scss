@@ -1,5 +1,8 @@
+// Página de recuperación: sigue el tema del sistema igual que el login
+// (claro en modo claro, oscuro en modo oscuro). Antes forzaba fondo negro
+// siempre, por eso se veía oscura aun con el tema claro del dispositivo.
 .custom-dark-content {
-  --background: #000000;
+  --background: #ffffff;
 }
 
 .recover-container {
@@ -16,35 +19,44 @@
   margin-left: -10px; // Ajuste para compensar el padding del botón
 
   .back-btn-blue {
-    --color: #bae0ff; // Color azul claro del label solicitado
+    --color: #3b82f6; // Azul legible sobre fondo claro
     font-size: 24px;
     margin-right: 10px;
   }
 
   .title {
-    color: #ffffff;
+    color: #1a1a1a;
     font-weight: 800;
     font-size: 26px;
-    margin: 0; // Quitar margen para que se alinee con la flecha
+    margin: 0;
   }
 }
 
 .custom-input-container {
-  background-color: #e9e9e9;
-  border-radius: 15px;
+  background-color: #ececec;
+  border-radius: 12px;
   margin-bottom: 20px;
-  padding: 8px 15px;
+  padding: 5px 15px;
 
-  .custom-input {
-    --placeholder-color: #8a8a8a;
-    --color: #000000;
+  // Label "stacked" (siempre visible arriba) + texto legible sobre la tarjeta.
+  ion-input.custom-input {
+    --background: transparent;
+    --color: #333333;
+    --placeholder-color: #9d9d9d;
+    --highlight-color-focused: #ff8a50; // Línea de foco acorde a la marca
     font-size: 16px;
+
+    &::part(label) {
+      color: #333333;
+      opacity: 1;
+    }
   }
 }
 
 .orange-button {
   --background: #ff8a50;
-  --border-radius: 15px;
+  --background-activated: #e67a46;
+  --border-radius: 12px;
   --box-shadow: none;
   height: 60px;
   font-weight: bold;
@@ -53,7 +65,26 @@
 }
 
 .resend-text {
-  --color: #8a8a8a;
+  --color: #777777;
+  margin-top: 15px;
+}
+
+.info-box {
+  margin-bottom: 20px;
+}
+
+.helper-text {
+  color: #444444;
+  margin: 0 0 4px;
+}
+
+.masked-email,
+.masked-email strong {
+  color: #1a1a1a;
+}
+
+.timer-info {
+  color: #777777;
   margin-top: 15px;
 }
 
@@ -69,5 +100,54 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ============================= */
+/* 🌙 MODO OSCURO (igual que login) */
+/* ============================= */
+@media (prefers-color-scheme: dark) {
+  .custom-dark-content {
+    --background: #121212;
+  }
+
+  .header-row {
+    .back-btn-blue {
+      --color: #bae0ff;
+    }
+
+    .title {
+      color: #ffffff;
+    }
+  }
+
+  .custom-input-container {
+    background-color: #1e1e1e;
+
+    ion-input.custom-input {
+      --color: #ffffff;
+      --placeholder-color: #aaaaaa;
+
+      &::part(label) {
+        color: #ffffff;
+      }
+    }
+  }
+
+  .resend-text {
+    --color: #aaaaaa;
+  }
+
+  .helper-text {
+    color: #cccccc;
+  }
+
+  .masked-email,
+  .masked-email strong {
+    color: #ffffff;
+  }
+
+  .timer-info {
+    color: #aaaaaa;
   }
 }

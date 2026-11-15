@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   selector: 'app-user-menu',
@@ -9,6 +10,6 @@ export class UserMenuComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    console.log('UserMenuComponent inicializado');
+    appLogger.log('UserMenuComponent inicializado');
   }
 }

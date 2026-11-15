@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { ModalController } from '@ionic/angular/standalone';
 import { RegisterModalComponent } from '../register-modal/register-modal.component';
 import {
@@ -22,6 +23,7 @@ import {
 } from '../../../constants/app.constants';
 import { environment } from 'src/environments/environment';
 import { NavigationService } from 'src/app/services/navigation.service';
+import { appLogger } from 'src/app/core/logger.service';
 
 declare let google: any;
 
@@ -134,9 +136,8 @@ export class LoginPage implements AfterViewInit {
                 this.loading = false;
               },
               error: (err) => {
-                console.warn(
+                appLogger.warn(
                   'No se pudo obtener perfil completo, usando datos parciales',
-                  err,
                 );
 
                 localStorage.setItem(
@@ -170,7 +171,9 @@ export class LoginPage implements AfterViewInit {
      GOOGLE INIT
   ====================== */
   ngAfterViewInit() {
-    void this.initGoogleButton();
+    if (!this.isNativeApp) {
+      void this.initGoogleButton();
+    }
 
     // Detectar si viene con parámetro para abrir modal de registro
     this.route.queryParams
@@ -210,7 +213,7 @@ export class LoginPage implements AfterViewInit {
             const googleBtn = document.getElementById('googleBtn');
 
             if (!googleBtn) {
-              console.warn('[Google Login] Botón googleBtn no encontrado');
+              appLogger.warn('[Google Login] Botón googleBtn no encontrado');
               this.googleButtonError = true;
               return;
             }
@@ -227,7 +230,7 @@ export class LoginPage implements AfterViewInit {
             this.googleButtonReady = true;
             return;
           } catch (error) {
-            console.error('[Google Login] Error inicializando botón:', error);
+            appLogger.error('[Google Login] Error inicializando botón');
             this.googleButtonError = true;
             return;
           }
@@ -237,7 +240,7 @@ export class LoginPage implements AfterViewInit {
       }
 
       this.googleButtonError = true;
-      console.warn('[Google Login] SDK de Google no disponible');
+      appLogger.warn('[Google Login] SDK de Google no disponible');
     } finally {
       this.googleInitInProgress = false;
     }
@@ -252,39 +255,12 @@ export class LoginPage implements AfterViewInit {
     this.loading = true;
 
     try {
-      if (!this.googleButtonReady) {
-        await this.initGoogleButton();
-      }
-
-      const googleApi = (window as any).google;
-
-      // Fallback: si el SDK de Google no está presente en este WebView,
-      // abrimos la página de login web en una nueva ventana/pestaña.
-      if (!googleApi) {
-        const webBase = (environment as any).webUrl
-          ? (environment as any).webUrl
-          : environment.apiUrl.replace('/api', '');
-        const webLogin = webBase + '/auth/login';
-        try {
-          window.open(webLogin, '_blank');
-        } catch (err) {
-          window.location.href = webLogin;
-        }
-        this.presentToast('Abriendo login web para Google...', 'info');
-        this.loading = false;
-        return;
-      }
-
-      if (!googleApi?.accounts?.id?.prompt) {
-        this.presentToast('Google no está disponible en la app.', 'warning');
-        this.loading = false;
-        return;
-      }
-
-      googleApi.accounts.id.prompt();
-    } catch (error) {
-      console.error('[Google Login] Error en app nativa:', error);
-      this.presentToast('No se pudo abrir Google en la app.', 'danger');
+      const googleUser = await GoogleAuth.signIn();
+      const idToken = googleUser.authentication?.idToken;
+      this.handleGoogleLogin({ credential: idToken });
+    } catch {
+      appLogger.error('[Google Login] Error en app nativa');
+      this.presentToast('No se pudo iniciar sesión con Google.', 'danger');
       this.loading = false;
     }
   }

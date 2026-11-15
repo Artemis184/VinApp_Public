@@ -234,7 +234,7 @@ console.error('❌ Notificación:', message);
 - 1.  Usuario hace click en switch
 - 2.  Frontend emite 'node:alarm:set'
 - 3.  Backend valida usuario, nodo, estado
-- 4.  Backend envía HTTP al maestro ESP8266 (192.168.4.30)
+- 4.  Backend envía HTTP al maestro ESP8266 (10.0.0.30)
 - 5.  Maestro controla RF24 y enciende/apaga nodo
 - 6.  Backend registra en auditoría
 - 7.  Backend hace broadcast 'node:alarm:state' a TODOS los clientes

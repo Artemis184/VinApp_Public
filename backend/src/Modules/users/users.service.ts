@@ -2,7 +2,7 @@ import { PrismaClient, revoke_reason } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { asignarRolaUser } from '../user_roles/userRoles.service';
 import { user_status } from '@prisma/client';
-import { sendStatusEmail } from '../email/email.service';
+import { sendStatusEmail, sendRegistrationAdminEmail } from '../email/email.service';
 import { IMAGE_MIME_BY_EXTENSION, ROLE_NAMES } from '../../constants/constants';
 import fs from 'fs';
 import path from 'path';
@@ -17,7 +17,16 @@ const MAX_EXTERNAL_AVATAR_REDIRECTS = 5;
 
 const notifyPendingStatusEmail = (userId: string, emailOrIdForLogs: string) => {
   sendStatusEmail(userId, user_status.PENDING).catch((error) => {
-    console.error(`⚠ Error al enviar email de estado PENDING a ${emailOrIdForLogs}:`, error);
+    console.error('⚠ Error al enviar email de estado PENDING:', error?.message);
+  });
+};
+
+const notifyRegistrationAdminEmail = (userId: string) => {
+  sendRegistrationAdminEmail(userId).catch((error) => {
+    console.error(
+      `⚠ Error al enviar email de nuevo registro a administradores para ${userId}:`,
+      error
+    );
   });
 };
 
@@ -505,9 +514,6 @@ export const crearUserconEmail = async (email: string, password: string) => {
 
     await asignarRolaUser(user.id, rolUser.id);
 
-    // Enviar correo sin bloquear el flujo principal
-    notifyPendingStatusEmail(user.id, normalizedEmail);
-
     return user;
   } catch (error) {
     console.error('Error al registrar usuario:', error);
@@ -558,8 +564,10 @@ export const completarRegistroUsuario = async (
       },
     });
 
-    // Confirmar por correo que la cuenta quedó en revisión
+    // El correo al usuario se envía cuando ya tiene nombre completo.
     notifyPendingStatusEmail(id, id);
+    // Y el admin recibe la notificación con el nombre real del usuario completo.
+    notifyRegistrationAdminEmail(id);
 
     return updatedUser;
   } catch (error) {
@@ -577,7 +585,7 @@ export const crearUserGoogle = async (
   try {
     const normalizedEmail = email.trim().toLowerCase();
 
-    console.log(`Iniciando creación de usuario: ${normalizedEmail}`);
+    console.log('Iniciando creación de usuario');
     const exists = await prisma.users.findFirst({
       where: {
         email: {
@@ -588,7 +596,7 @@ export const crearUserGoogle = async (
     });
 
     if (exists) {
-      console.log(`Usuario ${normalizedEmail} ya existe en BD`);
+      console.log('Usuario ya existe en BD');
       // Si el usuario ya existe, actualizar con datos de Google si no los tiene
       if (!exists.google_id) {
         console.log(`Usuario existe sin google_id. Vinculando Google...`);
@@ -600,14 +608,14 @@ export const crearUserGoogle = async (
             profile_photo: profile_photo ?? exists.profile_photo,
           },
         });
-        console.log(`Google ID vinculado al usuario ${normalizedEmail}`);
+        console.log('Google ID vinculado al usuario');
         return updatedUser;
       }
       console.log(`Usuario ya tiene google_id, retornando usuario existente`);
       return exists;
     }
 
-    console.log(`Creando nuevo usuario Google: ${normalizedEmail}`);
+    console.log('Creando nuevo usuario Google');
     const user = await prisma.users.create({
       data: {
         email: normalizedEmail,
@@ -618,7 +626,7 @@ export const crearUserGoogle = async (
       },
     });
 
-    console.log(`Usuario Google creado: ${normalizedEmail} (ID: ${user.id})`);
+    console.log('Usuario Google creado');
 
     const rolUser = await prisma.roles.findUnique({
       where: { name: ROLE_NAMES.CLIENT },
@@ -629,11 +637,15 @@ export const crearUserGoogle = async (
     }
 
     await asignarRolaUser(user.id, rolUser.id);
-    console.log(`Rol ${ROLE_NAMES.CLIENT} asignado a ${normalizedEmail}`);
+    console.log(`Rol ${ROLE_NAMES.CLIENT} asignado`);
 
-    // Enviar correo sin bloquear el flujo principal
-    console.log(`Iniciando envío de email a ${normalizedEmail}...`);
-    notifyPendingStatusEmail(user.id, normalizedEmail);
+    const hasFullName = Boolean((full_name ?? '').trim());
+    if (hasFullName) {
+      notifyPendingStatusEmail(user.id, normalizedEmail);
+      notifyRegistrationAdminEmail(user.id);
+    } else {
+      notifyRegistrationAdminEmail(user.id);
+    }
 
     return user;
   } catch (error) {
@@ -692,7 +704,7 @@ export const actualizarUser = async (
     });
 
     if (data.status && currentUser.status !== data.status) {
-      await sendStatusEmail(id, data.status).catch((err) =>
+      void sendStatusEmail(id, data.status).catch((err) =>
         console.error('Error al enviar email de estado:', err)
       );
     }
@@ -715,7 +727,9 @@ export const aprobarUser = async (id: string) => {
       where: { id },
       data: { status: 'APPROVED' },
     });
-    await sendStatusEmail(user.id, user_status.APPROVED);
+    void sendStatusEmail(user.id, user_status.APPROVED).catch((error) => {
+      console.error('Error al enviar email de aprobación:', error);
+    });
     return user;
   } catch (error) {
     console.error('Error al aprobar usuario:', error);

@@ -182,11 +182,15 @@
   gap: 10px;
   justify-content: center;
   margin-top: 15px;
-  align-items: stretch;
+  align-items: center;
 
   //forzado del boton
   #googleBtn {
+    width: 300px;
+    max-width: 100%;
+
     > div {
+      margin: 0 auto;
       border-radius: 50px !important;
       overflow: hidden;
     }

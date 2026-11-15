@@ -20,7 +20,7 @@ const char* WIFI_SSID = "TuSSID";
 const char* WIFI_PASSWORD = "TuPassword";
 
 // Configuración Backend
-const char* BACKEND_IP = "192.168.4.2";  // IP de tu backend
+const char* BACKEND_IP = "10.0.0.2";  // IP de tu backend
 const int BACKEND_PORT = 4000;           // Puerto de tu backend
 
 // Configuración RF24
@@ -246,7 +246,7 @@ Instala desde Arduino Library Manager:
 ### 1. Test de Conectividad Backend
 
 ```bash
-curl http://192.168.4.30/status
+curl http://10.0.0.30/status
 ```
 
 Esperado: `Maestro RF24 OK`
@@ -254,7 +254,7 @@ Esperado: `Maestro RF24 OK`
 ### 2. Test de Comando ON
 
 ```bash
-curl "http://192.168.4.30/on?n=3"
+curl "http://10.0.0.30/on?n=3"
 ```
 
 ### 3. Test de Reporte de Fallo (simular)
@@ -262,7 +262,7 @@ curl "http://192.168.4.30/on?n=3"
 Desconectar Nodo 3 y ejecutar:
 
 ```bash
-curl "http://192.168.4.30/on?n=3"
+curl "http://10.0.0.30/on?n=3"
 ```
 
 Debería:
@@ -279,7 +279,7 @@ Debería:
 Asegúrate de configurar en tu `.env`:
 
 ```env
-MAESTRO_IP=192.168.4.30
+MAESTRO_IP=10.0.0.30
 MAESTRO_PORT=80
 ```
 

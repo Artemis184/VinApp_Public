@@ -11,9 +11,13 @@ import {
   changeNodeStatus,
   reportNodeFailure,
   reportNodeRecovery,
+  reportNodeHealth, // <-- AGREGAR
+  getNodeHealthHistory, // <-- AGREGAR
+  getNodeHealthSummary, // <-- AGREGAR
 } from './nodes.controller';
 
 import { verifyToken } from '../../middlewares/verifyToken';
+import { requireAdmin } from '../../middlewares/authorizeRoles';
 import { adminAudit } from '../../middlewares/auditoria/adminAudit';
 import { userAudit } from '../../middlewares/auditoria/userAudit';
 import { PrismaClient, admin_action_type, user_action_type } from '@prisma/client';
@@ -35,14 +39,18 @@ const router = Router();
  */
 const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const apiKey = req.headers['x-api-key'];
-  const validApiKey = process.env.ARDUINO_API_KEY || '';
+  const validApiKey = (process.env.ARDUINO_API_KEY || '').trim();
 
-  console.log('\n🔑 API KEY MIDDLEWARE');
-  console.log('   ↳ Header recibido:', apiKey || '(vacío)');
-  console.log('   ↳ API Key esperada:', validApiKey);
-  console.log('   ↳ Coincide:', apiKey === validApiKey);
+  // Fail-closed: sin ARDUINO_API_KEY configurada, no se acepta ninguna petición.
+  if (!validApiKey) {
+    console.error('   ❌ ARDUINO_API_KEY no configurada: se rechaza la petición del maestro');
+    return res.status(503).json({
+      success: false,
+      error: 'Servicio del maestro no configurado',
+    });
+  }
 
-  if (apiKey === validApiKey) {
+  if (typeof apiKey === 'string' && apiKey === validApiKey) {
     console.log('   ✅ API Key válida - Arduino Maestro autenticado');
     return next();
   }
@@ -144,6 +152,7 @@ router.post(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Crea un nuevo nodo'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.CREATE_NODE,
     getNewValue: (req) => req.body,
@@ -160,6 +169,7 @@ router.patch(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Actualiza los datos de un nodo'
   verifyToken,
+  requireAdmin,
   uploadNodeImage.single('image'),
   adminAudit({
     action: admin_action_type.UPDATE_NODE_DATA,
@@ -179,6 +189,7 @@ router.patch(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Habilita un nodo'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.ENABLE_NODE,
     getAffectedNodeId: (req) => Number(req.params.id),
@@ -202,6 +213,7 @@ router.patch(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Deshabilita un nodo'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.SUSPEND_NODE,
     getAffectedNodeId: (req) => Number(req.params.id),
@@ -221,6 +233,7 @@ router.post(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Asigna un nodo a un usuario'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.ASSIGN_NODE,
     getAffectedUserId: (req) =>
@@ -238,6 +251,7 @@ router.delete(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Revoca un nodo de un usuario'
   verifyToken,
+  requireAdmin,
   adminAudit({
     action: admin_action_type.REVOKE_NODE,
     getAffectedUserId: (req) =>
@@ -316,7 +330,40 @@ router.post(
   // #swagger.tags = ['Nodes']
   // #swagger.description = 'Fuerza verificación inmediata de estado de todos los nodos'
   verifyToken,
+  requireAdmin,
   forceHeartbeat
+);
+
+// --- 2) Rutas ---
+// OJO CON EL ORDEN: '/health/summary' tiene que ir ANTES
+// que '/:id', o Express interpreta "health" como un id.
+// Lo mismo pasa hoy con '/list' y '/ping' en este archivo.
+// REPORTE DE SALUD (llamado por el Maestro RF24)
+// Protegido con API Key - No requiere JWT
+router.post(
+  '/health',
+  // #swagger.tags = ['Nodes']
+  // #swagger.description = 'Registra reporte de salud de un nodo hijo (requiere API Key)'
+  apiKeyMiddleware,
+  reportNodeHealth
+);
+// RESUMEN DE SALUD DE TODOS LOS NODOS (JWT)
+// DEBE ir antes de '/:id'
+router.get(
+  '/health/summary',
+  // #swagger.tags = ['Nodes']
+  // #swagger.description = 'Ultimo estado de salud de cada nodo + delta de 7 dias'
+  verifyToken,
+  getNodeHealthSummary
+);
+// HISTORIAL DE SALUD DE UN NODO (JWT)
+// Query: ?limit=100&days=30
+router.get(
+  '/:id/health',
+  // #swagger.tags = ['Nodes']
+  // #swagger.description = 'Historial de salud de un nodo'
+  verifyToken,
+  getNodeHealthHistory
 );
 
 export default router;

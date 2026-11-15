@@ -30,7 +30,7 @@ export const adminAudit =
 
     try {
       if (process.env.NODE_ENV !== 'production') {
-        console.log('🟡 [ADMIN AUDIT] req.user:', req.user);
+        console.log('🟡 [ADMIN AUDIT] autenticación administrativa verificada');
       }
 
       const adminId = req.user?.user_uuid;
@@ -42,8 +42,7 @@ export const adminAudit =
       }
 
       if (process.env.NODE_ENV !== 'production') {
-        console.log('🟢 [ADMIN AUDIT] adminId:', adminId);
-        console.log('🟡 [ADMIN AUDIT] req.params:', req.params);
+        console.log('🟢 [ADMIN AUDIT] solicitud administrativa identificada');
       }
 
       let oldValue = null;
@@ -53,7 +52,7 @@ export const adminAudit =
         }
         oldValue = await getOldValue(req);
         if (process.env.NODE_ENV !== 'production') {
-          console.log('🟢 [ADMIN AUDIT] oldValue:', oldValue);
+          console.log('🟢 [ADMIN AUDIT] oldValue obtenido');
         }
       }
 
@@ -64,7 +63,7 @@ export const adminAudit =
         }
         newValue = getNewValue(req);
         if (process.env.NODE_ENV !== 'production') {
-          console.log('🟢 [ADMIN AUDIT] newValue:', newValue);
+          console.log('🟢 [ADMIN AUDIT] newValue obtenido');
         }
       }
 
@@ -75,7 +74,7 @@ export const adminAudit =
       const ipAddress = getClientIp(req);
 
       if (process.env.NODE_ENV !== 'production') {
-        console.log('🟢 [ADMIN AUDIT] affectedUserId:', affectedUserId);
+        console.log('🟢 [ADMIN AUDIT] recurso afectado identificado');
       }
 
       await prisma.audit_admin_actions.create({

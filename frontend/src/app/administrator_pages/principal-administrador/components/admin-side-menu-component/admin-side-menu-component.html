@@ -10,6 +10,7 @@
       <ng-container *ngIf="menus.length; else loadingOrEmpty">
         <ion-menu-toggle autoHide="true" *ngFor="let m of menus">
           <ion-item button [routerLink]="m.path" routerDirection="root">
+            <ion-icon [name]="iconName(m.icon)" slot="start"></ion-icon>
             <ion-label>{{ m.name }}</ion-label>
             <ion-badge *ngIf="m.path?.includes('listado-pendientes-acciones')"
               >{{ solicitudesCount }}</ion-badge

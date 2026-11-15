@@ -2,12 +2,15 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import {
   IonContent,
   IonList,
   IonIcon,
   IonCard,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/angular/standalone';
 
 import {
@@ -15,6 +18,7 @@ import {
   UsuarioPendiente,
 } from '../services/usu-pendientes';
 import { AdminBackHeaderComponent } from 'src/app/shared/admin-back-header/admin-back-header.component';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   selector: 'app-listado-pendientes-acciones',
@@ -29,6 +33,8 @@ import { AdminBackHeaderComponent } from 'src/app/shared/admin-back-header/admin
     IonList,
     IonIcon,
     IonCard,
+    IonRefresher,
+    IonRefresherContent,
     AdminBackHeaderComponent,
   ],
 })
@@ -43,15 +49,22 @@ export class ListadoPendientesAccionesPage {
     this.cargarUsuarios();
   }
 
-  cargarUsuarios() {
-    this.usuariosService.getUsuarios().subscribe({
-      next: (data) => {
-        this.usuarios = data;
-      },
-      error: (err: unknown) => {
-        console.error('Error cargando usuarios', err);
-      },
-    });
+  async cargarUsuarios(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.usuariosService.getUsuarios());
+
+      this.usuarios = data;
+    } catch (error) {
+      appLogger.error('Error cargando usuarios');
+    }
+  }
+
+  async handleRefresh(event: any): Promise<void> {
+    try {
+      await this.cargarUsuarios();
+    } finally {
+      event.target.complete();
+    }
   }
 
   verDetalle(usuario: UsuarioPendiente) {

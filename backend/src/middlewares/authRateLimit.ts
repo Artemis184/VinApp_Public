@@ -36,3 +36,11 @@ export const refreshRateLimiter = createAuthLimiter(
   '/refresh',
   true
 );
+
+// Limita la creación de cuentas (email y Google) por IP para evitar
+// registro masivo/automatizado. Se puede ajustar con env vars.
+export const registerRateLimiter = createAuthLimiter(
+  config.AUTH_REGISTER_RATE_LIMIT_MAX,
+  '/register',
+  false
+);

@@ -73,22 +73,10 @@ export const getAuditUserActionsAlarma = async (req: Request, res: Response) => 
     const startDate: Date | undefined = from ? new Date(`${from}T00:00:00.000Z`) : undefined;
     const endDate: Date | undefined = to ? new Date(`${to}T23:59:59.999Z`) : undefined;
 
-    const [alarmActions, allNodes] = await Promise.all([
-      service.getAuditUserActionsAlarma(parsedNodeId, startDate, endDate),
-      service.getAllNodesBase(),
-    ]);
+    const alarmActions = await service.getAuditUserActionsAlarma(parsedNodeId, startDate, endDate);
 
-    const alarmNodes = parsedNodeId
-      ? allNodes.filter((node: any) => node.id === parsedNodeId)
-      : allNodes;
-
-    const actionsByNode = new Set<number>();
     const actionRows = alarmActions.map((action: any) => {
       const node = action.nodes;
-
-      if (action.node_id) {
-        actionsByNode.add(Number(action.node_id));
-      }
 
       return {
         id: Number(action.id),
@@ -100,19 +88,8 @@ export const getAuditUserActionsAlarma = async (req: Request, res: Response) => 
       };
     });
 
-    const nodesWithoutActivity = alarmNodes
-      .filter((node: any) => !actionsByNode.has(Number(node.id)))
-      .map((node: any) => ({
-        id: 0,
-        titulo: `ALARMA # ${node.code || '---'}`,
-        estado_texto: 'SIN ACTIVIDAD',
-        direccion: node.description || 'Ubicación no definida',
-        usuario: 'Sistema',
-        fecha_raw: new Date().toISOString(),
-      }));
-
-    const formattedData = [...actionRows, ...nodesWithoutActivity].sort(
-      (a: any, b: any) => new Date(b.fecha_raw).getTime() - new Date(a.fecha_raw).getTime(),
+    const formattedData = actionRows.sort(
+      (a: any, b: any) => new Date(b.fecha_raw).getTime() - new Date(a.fecha_raw).getTime()
     );
 
     res.status(200).json({
@@ -131,18 +108,9 @@ export const getNodesBaseList = async (_req: Request, res: Response) => {
     // Llamamos al servicio para traer los 5 registros de la tabla 'nodes'
     const nodes = await service.getAllNodesBase();
 
-    const formattedData = nodes.map((node: any) => ({
-      id: 0,
-      titulo: `ALARMA # ${node.code}`,
-      estado_texto: 'SIN ACTIVIDAD',
-      direccion: node.description || 'Ubicación no definida',
-      usuario: 'Sistema',
-      fecha_raw: new Date().toISOString(),
-    }));
-
     res.status(200).json({
-      cant: formattedData.length,
-      data: serializeBigInt(formattedData),
+      cant: nodes.length,
+      data: serializeBigInt(nodes),
       message: 'Nodos base obtenidos con éxito',
     });
   } catch (error) {

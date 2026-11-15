@@ -80,6 +80,29 @@ export const validationUtils = {
     return data;
   },
 
+  // Sanea los campos de texto libre de un nodo para evitar XSS almacenado.
+  // Solo toca campos de texto; el resto del body se conserva intacto.
+  nodeText: (data: any) => {
+    const clean: any = { ...data };
+    const textFields: Array<{ key: string; max: number }> = [
+      { key: 'name', max: 100 },
+      { key: 'code', max: 50 },
+      { key: 'description', max: 500 },
+      { key: 'location', max: 200 },
+    ];
+
+    for (const { key, max } of textFields) {
+      if (data[key] !== undefined && data[key] !== null) {
+        if (typeof data[key] !== 'string') {
+          throw new Error(`El campo ${key} debe ser texto`);
+        }
+        clean[key] = validator.escape(data[key].trim().substring(0, max));
+      }
+    }
+
+    return clean;
+  },
+
   userUpdate: (data: any) => {
     const clean: any = {};
     const errors: string[] = [];

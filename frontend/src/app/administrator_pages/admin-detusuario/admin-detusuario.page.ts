@@ -32,6 +32,7 @@ import { Notificaciones } from 'src/app/administrator_pages/services/notificacio
 import { AdminUsuarios } from 'src/app/administrator_pages/services/admin-usuarios';
 import { AdminAlarmasModalPage } from '../admin-alarmas-modal/admin-alarmas-modal.page';
 import { UserNodes } from '../services/user-nodes';
+import { appLogger } from 'src/app/core/logger.service';
 
 // IMPORTACIÓN DE TUS CONSTANTES Y FUNCIONES GLOBALES
 import {
@@ -123,7 +124,7 @@ export class AdminDetusuarioPage implements OnInit {
       next: (ids) => {
         this.realSelectedIds = ids;
       },
-      error: (err) => console.warn('Error al cargar alarmas reales:', err),
+      error: () => appLogger.warn('Error al cargar alarmas reales'),
     });
   }
 

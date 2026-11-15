@@ -25,7 +25,7 @@ import {
   MenuGeneralUserInput,
   MyProfileResponse,
 } from './interfaces/datos_usuario.interface';
-import { MENU_GENERAL_CONFIG } from 'src/constants/app.constants';
+import { AUTH_STORAGE, MENU_GENERAL_CONFIG } from 'src/constants/app.constants';
 import { MenuGeneralProfileService } from './services/menu-general-profile.service';
 import { AuthService } from 'src/app/auth/services/auth.service';
 
@@ -312,6 +312,16 @@ export class MenuGeneralComponent implements OnInit, OnDestroy {
 
     try {
       await firstValueFrom(this.profileService.updateMyProfile(formData));
+      const profileResponse = await firstValueFrom(
+        this.profileService.getMyProfile(),
+      );
+      const updatedProfile = profileResponse.data;
+      const storedUser = localStorage.getItem(AUTH_STORAGE.USER);
+      const currentUser = storedUser ? JSON.parse(storedUser) : {};
+      localStorage.setItem(
+        AUTH_STORAGE.USER,
+        JSON.stringify({ ...currentUser, ...updatedProfile }),
+      );
       const successToast = await this.toastCtrl.create({
         message: 'Perfil actualizado correctamente',
         duration: MENU_GENERAL_CONFIG.TOAST_DURATION_MS,
@@ -321,7 +331,9 @@ export class MenuGeneralComponent implements OnInit, OnDestroy {
       await successToast.present();
 
       this.limpiarCamposSensibles();
-      this.cerrarDirecto();
+      this.modalCtrl.dismiss({
+        avatarUrl: updatedProfile.profile_photo,
+      });
     } catch (error: unknown) {
       const apiError = error as ApiErrorResponse;
       const message =

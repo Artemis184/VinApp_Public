@@ -1,6 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
+// Lee una contraseña del seed desde .env; falla si no está definida.
+const requireSeedPassword = (envName: string): string => {
+  const value = process.env[envName];
+  if (!value) {
+    throw new Error(`Define ${envName} en .env antes de ejecutar el seed`);
+  }
+  return value;
+};
+
 export async function initialSeed(prisma: PrismaClient) {
   console.log('🌱 Iniciando initialSeed…');
 
@@ -9,7 +18,6 @@ export async function initialSeed(prisma: PrismaClient) {
   // ======================================================
   try {
     console.log('🗑️  Limpiando datos existentes...');
-
     // Eliminar en orden de dependencias
     // NOTA: la tabla revoked_tokens no existe. Ahora la revocación de sesiones o tokens se controla con session.is_revoked
     await prisma.password_reset_codes.deleteMany({});
@@ -63,14 +71,13 @@ export async function initialSeed(prisma: PrismaClient) {
   // ======================================================
   // 2. CREAR CUENTA MAESTRA
   // ======================================================
-  // Credenciales de ejemplo: no usar valores reales en repositorios públicos.
-  const masterPassword = await bcrypt.hash('change_me_master_password', 10);
+  const masterPassword = await bcrypt.hash(requireSeedPassword('SEED_MASTER_PASSWORD'), 10);
 
   const masterUser = await prisma.users.upsert({
-    where: { email: 'master@example.com' },
+    where: { email: 'cuenta.maestra@example.com' },
     update: {},
     create: {
-      email: 'master@example.com',
+      email: 'cuenta.maestra@example.com',
       full_name: 'Cuenta Maestra',
       password_hash: masterPassword,
       status: 'APPROVED',
@@ -98,13 +105,13 @@ export async function initialSeed(prisma: PrismaClient) {
   // ======================================================
   // 2.1. CREAR CUENTA ADMINISTRADOR
   // ======================================================
-  const adminPassword = await bcrypt.hash('change_me_admin_password', 10);
+  const adminPassword = await bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 10);
 
   const adminUser = await prisma.users.upsert({
-    where: { email: 'admin1example@email.com' },
+    where: { email: 'admin@example.com' },
     update: {},
     create: {
-      email: 'admin1example@email.com',
+      email: 'admin@example.com',
       full_name: 'VinAdmin',
       password_hash: adminPassword,
       status: 'APPROVED',
@@ -140,7 +147,7 @@ export async function initialSeed(prisma: PrismaClient) {
     throw new Error('❌ Rol CLIENT no encontrado');
   }
 
-  const clientPassword = await bcrypt.hash('change_me_client_password', 10);
+  const clientPassword = await bcrypt.hash(requireSeedPassword('SEED_CLIENT_PASSWORD'), 10);
 
   const clientUser = await prisma.users.upsert({
     where: { email: 'cliente@example.com' },
@@ -172,228 +179,44 @@ export async function initialSeed(prisma: PrismaClient) {
   console.log('✔ Cuenta usuario final creada');
 
   // ======================================================
-  // 2.3. CREAR 4 ADMINISTRADORES DE PRUEBA ADICIONALES
-  // ======================================================
-  const adminAccounts = [
-    { email: 'admin1@example.com', name: 'Admin Uno', password: 'change_me_demo_admin_1' },
-    { email: 'admin2@example.com', name: 'Admin Dos', password: 'change_me_demo_admin_2' },
-    { email: 'admin3@example.com', name: 'Admin Tres', password: 'change_me_demo_admin_3' },
-    { email: 'admin4@example.com', name: 'Admin Cuatro', password: 'change_me_demo_admin_4' },
-  ];
-
-  for (const account of adminAccounts) {
-    const hashedPassword = await bcrypt.hash(account.password, 10);
-    const newAdminUser = await prisma.users.upsert({
-      where: { email: account.email },
-      update: {},
-      create: {
-        email: account.email,
-        full_name: account.name,
-        password_hash: hashedPassword,
-        status: 'APPROVED',
-        is_master: false,
-      },
-    });
-
-    // Asignar rol ADMIN
-    await prisma.user_roles.upsert({
-      where: {
-        user_id_role_id: {
-          user_id: newAdminUser.id,
-          role_id: adminRole.id,
-        },
-      },
-      update: {},
-      create: {
-        user_id: newAdminUser.id,
-        role_id: adminRole.id,
-      },
-    });
-  }
-
-  console.log('✔ 4 administradores de prueba adicionales creados');
-
-  // ======================================================
-  // 2.4. CREAR 5 USUARIOS FINALES DE PRUEBA ADICIONALES
-  // ======================================================
-  const clientAccounts = [
-    {
-      email: 'cliente1@example.com',
-      name: 'Juan Pérez',
-      password: 'change_me_demo_password',
-      status: 'PENDING' as const,
-      phone: '0928358183',
-      address: 'Salinas - Ecuador',
-      reference: 'Frente al Tuti',
-      age: 25,
-    },
-    {
-      email: 'cliente2@example.com',
-      name: 'María Gómez',
-      password: 'change_me_demo_client_2',
-      status: 'PENDING' as const,
-      phone: '0992233445',
-      address: 'La Libertad',
-      reference: 'Cerca del parque',
-      age: 29,
-    },
-    {
-      email: 'cliente3@example.com',
-      name: 'Carlos Ruiz',
-      password: 'change_me_demo_client_3',
-      status: 'PENDING' as const,
-      phone: '0988877665',
-      address: 'Santa Elena',
-      reference: 'Diagonal al colegio',
-      age: 32,
-    },
-    {
-      email: 'cliente4@example.com',
-      name: 'Ana Martínez',
-      password: 'change_me_demo_client_4',
-      status: 'SUSPENDED' as const,
-      phone: '0987654321',
-      address: 'Montañita',
-      reference: 'Hostal con techo de paja',
-      age: 22,
-    },
-    {
-      email: 'cliente5@example.com',
-      name: 'Luis García',
-      password: 'change_me_demo_client_5',
-      status: 'APPROVED' as const,
-      phone: '0998765432',
-      address: 'Ballenita',
-      reference: 'Frente al redondel',
-      age: 45,
-    },
-    {
-      email: 'cliente6@example.com',
-      name: 'Elena Rodríguez',
-      password: 'change_me_demo_client_6',
-      status: 'APPROVED' as const,
-      phone: '0976543210',
-      address: 'Anconcito',
-      reference: 'Junto al muelle',
-      age: 38,
-    },
-    {
-      email: 'cliente7@example.com',
-      name: 'Pedro Sánchez',
-      password: 'change_me_demo_client_7',
-      status: 'REJECTED' as const,
-      phone: '0965432109',
-      address: 'Punta Carnero',
-      reference: 'Casa de 2 pisos',
-      age: 27,
-    },
-    {
-      email: 'cliente8@example.com',
-      name: 'Laura Torres',
-      password: 'change_me_demo_client_8',
-      status: 'APPROVED' as const,
-      phone: '0954321098',
-      address: 'Salinas',
-      reference: 'Cerca del malecón',
-      age: 31,
-    },
-    {
-      email: 'cliente9@example.com',
-      name: 'David Romero',
-      password: 'change_me_demo_client_9',
-      status: 'PENDING' as const,
-      phone: '0943210987',
-      address: 'La Libertad',
-      reference: 'Edificio azul',
-      age: 26,
-    },
-    {
-      email: 'cliente10@example.com',
-      name: 'Sofía Castro',
-      password: 'change_me_demo_client_10',
-      status: 'SUSPENDED' as const,
-      phone: '0932109876',
-      address: 'Santa Elena',
-      reference: 'Al lado de la farmacia',
-      age: 41,
-    },
-  ];
-
-  for (const account of clientAccounts) {
-    const hashedPassword = await bcrypt.hash(account.password, 10);
-    const newClientUser = await prisma.users.upsert({
-      where: { email: account.email },
-      update: {},
-      create: {
-        email: account.email,
-        full_name: account.name,
-        password_hash: hashedPassword,
-        status: account.status,
-        phone: account.phone,
-        address: account.address,
-        reference: account.reference,
-        age: account.age,
-        is_master: false,
-      },
-    });
-
-    // Asignar rol CLIENT
-    await prisma.user_roles.upsert({
-      where: {
-        user_id_role_id: {
-          user_id: newClientUser.id,
-          role_id: clientRole.id,
-        },
-      },
-      update: {},
-      create: {
-        user_id: newClientUser.id,
-        role_id: clientRole.id,
-      },
-    });
-  }
-
-  console.log('✔ 10 usuarios finales de prueba creados con diferentes estados');
-
-  // ======================================================
   // 3. CREAR NODOS INICIALES (1–5)
   // ======================================================
   const nodes = [
     {
       name: 'Alarma 1',
       code: 'ALM-JC-0001-L1',
-      description: 'Zona 1',
-      location: '-2.2303678848108776, -80.862793642438',
+      description: 'Zona 1 - Alarma de ejemplo',
+      location: '-2.001, -80.9001',
       rf_slot: 1,
       uses_repeater: true,
     },
     {
       name: 'Alarma 2',
       code: 'ALM-JC-0002-L2',
-      description: 'Zona 2',
-      location: '-2.2316450984419505, -80.862176451561',
+      description: 'Zona 2 - Alarma de ejemplo',
+      location: '-2.002, -80.9002',
       rf_slot: 2,
       uses_repeater: true,
     },
     {
       name: 'Alarma 3',
       code: 'ALM-JC-0003-L3',
-      description: 'Zona 3',
-      location: '-2.2309904495094, -80.861571825804',
+      description: 'Zona 3 - Alarma de ejemplo',
+      location: '-2.003, -80.9003',
       rf_slot: 3,
     },
     {
       name: 'Alarma 4',
       code: 'ALM-JC-0004-L4',
-      description: 'Zona 4',
-      location: '-2.2304816384028516, -80.860955287857',
+      description: 'Zona 4 - Alarma de ejemplo',
+      location: '-2.004, -80.9004',
       rf_slot: 4,
     },
     {
       name: 'Alarma 5',
       code: 'ALM-JC-0005-L5',
-      description: 'Zona 5',
-      location: '-2.2319932730294, -80.860943408023',
+      description: 'Zona 5 - Alarma de ejemplo',
+      location: '-2.005, -80.9005',
       rf_slot: 5,
     },
   ];
@@ -406,7 +229,7 @@ export async function initialSeed(prisma: PrismaClient) {
     });
   }
 
-  console.log('✔ Nodos 1–5 creados');
+  console.log(`✔ Nodos 1–${nodes.length} creados`);
 
   // ======================================================
   // 3.1 ASIGNAR TODOS LOS NODOS A USUARIOS ADMIN
@@ -466,8 +289,8 @@ export async function initialSeed(prisma: PrismaClient) {
       display_order: 1,
     },
     {
-      name: 'Principal Administrador',
-      icon: 'person',
+      name: 'Inicio',
+      icon: 'home',
       path: '/administrator/principal-administrador',
       description: 'Panel principal del administrador',
       parent_id: null,

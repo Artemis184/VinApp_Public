@@ -11,7 +11,6 @@ export interface Alarma {
   code: string;
   description: string;
   location: string;
-  rf_address: string;
   installation_image: string;
   is_enabled: boolean;
   is_online?: boolean;
@@ -26,6 +25,7 @@ export class Alarmas {
   private http = inject(HttpClient);
   private httpUtils = inject(HttpUtilsService);
   private apiUrl = environment.apiUrl + '/nodes/';
+  private readonly allowedImageHosts = new Set(['vinapp.artemisnet.cloud']);
 
   getAlarmas(): Observable<BackendResponse<Alarma[]>> {
     return this.http.get<BackendResponse<Alarma[]>>(this.apiUrl, {
@@ -46,9 +46,24 @@ export class Alarmas {
   }
 
   getImageUrl(imagePath: string | null | undefined): string {
-    if (!imagePath) return 'assets/default-node.png';
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${environment.apiUrl.replace('/api', '')}${imagePath}`;
+    const fallback = 'assets/default-node.png';
+    const value = imagePath?.trim();
+
+    if (!value) return fallback;
+
+    try {
+      const apiOrigin = new URL(environment.apiUrl).origin;
+      const imageUrl = new URL(value, apiOrigin);
+      const hostname = imageUrl.hostname.toLowerCase();
+
+      if (!this.allowedImageHosts.has(hostname)) return fallback;
+      if (imageUrl.protocol === 'http:') imageUrl.protocol = 'https:';
+      if (imageUrl.protocol !== 'https:') return fallback;
+
+      return imageUrl.toString();
+    } catch {
+      return fallback;
+    }
   }
 
   actualizarAlarma(

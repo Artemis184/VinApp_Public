@@ -13,6 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MenuService } from 'src/app/services/menu.service';
 import { UsuPendientesService } from '../../../services/usu-pendientes';
 import { AUTH_STORAGE } from 'src/constants/app.constants';
+import { appLogger } from 'src/app/core/logger.service';
 
 import {
   IonMenu,
@@ -20,6 +21,7 @@ import {
   IonList,
   IonItem,
   IonLabel,
+  IonIcon,
   IonBadge,
   IonMenuToggle,
 } from '@ionic/angular/standalone';
@@ -41,6 +43,7 @@ import {
     IonList,
     IonItem,
     IonLabel,
+    IonIcon,
     IonBadge,
     IonMenuToggle,
   ],
@@ -96,7 +99,7 @@ export class AdminSideMenuComponent implements OnInit, OnChanges {
         this.menus = ms;
       },
       error: (err) => {
-        console.error('[AdminSideMenu] Error cargando menús:', err);
+        appLogger.error('[AdminSideMenu] Error cargando menús');
         this.menus = [];
       },
     });
@@ -114,5 +117,9 @@ export class AdminSideMenuComponent implements OnInit, OnChanges {
           this.solicitudesCount = 0;
         },
       });
+  }
+
+  iconName(icon: string | null | undefined): string {
+    return icon === 'analytics' ? 'pulse-outline' : icon || 'ellipse-outline';
   }
 }

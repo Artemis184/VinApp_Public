@@ -3,12 +3,13 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json .npmrc ./
 RUN npm ci
 
 COPY . .
 
-RUN npm run build -- --configuration production
+RUN npm run generate-env
+RUN npx ng build --configuration=production
 
 # ---------- SERVE ----------
 FROM nginx:alpine

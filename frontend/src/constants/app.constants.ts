@@ -61,13 +61,16 @@ export const AUTH_HTTP = {
 /**
  * Duración y mantenimiento de sesiones.
  */
+// Debe coincidir con el backend (SESSION_CONFIG.REFRESH_TOKEN_EXPIRY_DAYS).
+const REFRESH_TOKEN_DAYS = 60;
+
 export const SESSION_CONFIG = {
-  // Duración máxima permitida para una sesión persistente
-  MAX_SESSION_DURATION_MS: 36500 * 24 * 60 * 60 * 1000,
+  // Duración máxima permitida para una sesión persistente (alineada al refresh).
+  MAX_SESSION_DURATION_MS: REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
 
   // Fallbacks cuando el backend no envía expiración explícita
   ACCESS_TOKEN_FALLBACK_MS: 15 * 60 * 1000,
-  REFRESH_TOKEN_FALLBACK_MS: 36500 * 24 * 60 * 60 * 1000,
+  REFRESH_TOKEN_FALLBACK_MS: REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000,
 
   // Tiempo antes de expiración en el que se debe refrescar el token
   REFRESH_TOKEN_THRESHOLD_MS: 2 * 60 * 1000,

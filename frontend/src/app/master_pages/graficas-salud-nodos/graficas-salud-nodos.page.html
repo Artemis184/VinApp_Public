@@ -1,0 +1,223 @@
+<app-admin-back-header
+  title="Salud de nodos"
+  [showUserMenu]="true"
+  defaultHref="/administrator/principal-administrador"
+></app-admin-back-header>
+
+<ion-content color="light">
+  <ion-refresher slot="fixed" (ionRefresh)="loadSummary($event)">
+    <ion-refresher-content pullingText="Actualizar"></ion-refresher-content>
+  </ion-refresher>
+
+  <main class="health-page">
+    <section class="page-intro">
+      <div>
+        <p class="eyebrow">MONITOREO RF24</p>
+        <h1>Estado de la red</h1>
+        <p class="intro-copy">
+          Resumen de reportes recibidos de los nodos hijos.
+        </p>
+      </div>
+      <ion-button fill="clear" aria-label="Actualizar" (click)="loadSummary()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </section>
+
+    <section class="controls" aria-label="Periodo del resumen">
+      <span>Ventana de análisis</span>
+      <ion-select
+        [(ngModel)]="selectedDays"
+        (ionChange)="loadSummary()"
+        interface="popover"
+      >
+        <ion-select-option *ngFor="let days of daysOptions" [value]="days">
+          {{ days }} días
+        </ion-select-option>
+      </ion-select>
+    </section>
+
+    <div class="error-banner" *ngIf="errorMessage">
+      <ion-icon name="warning-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando reportes...</span>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <section class="stat-grid" aria-label="Resumen de salud">
+        <button
+          type="button"
+          class="stat-card stat-card--total"
+          [class.active]="statusFilter === 'all'"
+          (click)="setStatusFilter('all')"
+        >
+          <span class="stat-label">Nodos monitoreados</span>
+          <strong>{{ summaries.length }}</strong>
+          <ion-icon name="radio-outline"></ion-icon>
+        </button>
+        <button
+          type="button"
+          class="stat-card stat-card--healthy"
+          [class.active]="statusFilter === 'ok'"
+          (click)="setStatusFilter('ok')"
+        >
+          <span class="stat-label">Saludables</span>
+          <strong>{{ healthyCount }}</strong>
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </button>
+        <button
+          type="button"
+          class="stat-card stat-card--alert"
+          [class.loud]="alertCount > 0"
+          [class.active]="statusFilter === 'alert'"
+          (click)="setStatusFilter('alert')"
+        >
+          <span class="stat-label">Requieren revisión</span>
+          <strong>{{ alertCount }}</strong>
+          <ion-icon name="pulse-outline"></ion-icon>
+        </button>
+      </section>
+
+      <section class="chart-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">REINICIOS ANORMALES</p>
+            <h2>Incidencias por nodo</h2>
+          </div>
+          <span class="chart-caption">Últimos {{ selectedDays }} días</span>
+        </div>
+        <div class="bar-chart" *ngIf="summaries.length; else noData">
+          <button
+            type="button"
+            class="bar-column"
+            *ngFor="let node of summaries"
+            (click)="selectNode(node)"
+          >
+            <span
+              class="bar-value"
+              [class.hot]="(node.resetsAnormalesEnVentana ?? 0) > 0"
+            >
+              {{ node.resetsAnormalesEnVentana ?? 0 }}
+            </span>
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [class.zero]="!(node.resetsAnormalesEnVentana ?? 0)"
+                [style.height]="barHeight(node.resetsAnormalesEnVentana)"
+              ></div>
+            </div>
+            <strong>{{ node.code }}</strong>
+          </button>
+        </div>
+        <ng-template #noData>
+          <p class="empty-message">No hay nodos para mostrar.</p>
+        </ng-template>
+      </section>
+
+      <section class="nodes-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DETALLE OPERATIVO</p>
+            <h2>Último reporte por nodo</h2>
+          </div>
+          <span class="chart-caption"
+            >{{ filteredSummaries.length }} registros</span
+          >
+        </div>
+
+        <div class="node-list">
+          <div class="node-wrap" *ngFor="let node of filteredSummaries">
+            <button
+              class="node-row"
+              type="button"
+              [class.node-row--selected]="selectedNode?.nodeId === node.nodeId"
+              (click)="toggleNode(node)"
+            >
+              <span
+                class="status-dot"
+                [class.status-dot--alert]="!node.healthy && !node.sinDatos"
+                [class.status-dot--mute]="node.sinDatos"
+              ></span>
+              <span class="node-main">
+                <strong>{{ node.name }}</strong>
+                <span class="node-meta">
+                  <span class="code"
+                    >{{ node.code }} · RF {{ node.rfSlot ?? 'N/D' }}</span
+                  >
+                  <span class="route-chip" [class.rpt]="usesRepeater(node)"
+                    >{{ routeLabel(node) }}</span
+                  >
+                </span>
+              </span>
+              <span
+                class="node-status"
+                [class.node-status--alert]="!node.healthy || node.sinDatos"
+              >
+                {{ statusLabel(node) }}
+              </span>
+              <ion-icon
+                [name]="
+                  selectedNode?.nodeId === node.nodeId
+                    ? 'chevron-down-outline'
+                    : 'chevron-forward-outline'
+                "
+              ></ion-icon>
+            </button>
+
+            <div class="drawer" *ngIf="selectedNode?.nodeId === node.nodeId">
+              <div class="history-summary">
+                <span
+                  >Radio:
+                  <strong>{{ selectedNode!.radioReinits ?? 0 }}</strong></span
+                >
+                <span
+                  >Arranques:
+                  <strong>{{ selectedNode!.boots ?? 0 }}</strong></span
+                >
+                <span
+                  >Uptime:
+                  <strong>{{ selectedNode!.uptimeHours ?? 0 }} h</strong></span
+                >
+                <span
+                  >Último:
+                  <strong
+                    >{{ formatDate(selectedNode!.lastReportAt) }}</strong
+                  ></span
+                >
+              </div>
+              <div
+                class="loading-state loading-state--small"
+                *ngIf="loadingHistory"
+              >
+                <ion-spinner name="crescent"></ion-spinner>
+              </div>
+              <ion-list lines="none" *ngIf="!loadingHistory">
+                <ion-item *ngFor="let log of history">
+                  <ion-label>
+                    <h3>{{ formatDate(log.recorded_at) }}</h3>
+                    <p>
+                      Radio {{ log.radio_reinits }} · Arranques {{ log.boots }}
+                      · RX {{ log.rx_count }}
+                    </p>
+                  </ion-label>
+                  <span
+                    class="history-badge"
+                    [class.history-badge--alert]="log.abnormal_reset"
+                  >
+                    {{ log.abnormal_reset ? 'Reset anormal' : 'Normal' }}
+                  </span>
+                </ion-item>
+                <p class="empty-message" *ngIf="!history.length">
+                  No hay historial en los últimos {{ selectedDays }} días.
+                </p>
+              </ion-list>
+            </div>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+  </main>
+</ion-content>

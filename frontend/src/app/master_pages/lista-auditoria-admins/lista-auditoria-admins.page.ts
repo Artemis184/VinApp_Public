@@ -23,6 +23,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { AdminBackHeaderComponent } from 'src/app/shared/admin-back-header/admin-back-header.component';
+import { appLogger } from 'src/app/core/logger.service';
 
 import {
   ACCION_TRADUCCION,
@@ -202,7 +203,7 @@ export class ListaAuditoriaAdminsPage implements OnInit {
 
           this.finalizarCarga();
         },
-        error: (err) => console.error('Error en historial de alarma', err),
+        error: () => appLogger.error('Error en historial de alarma'),
       });
     } else {
       // --- MODO ADMINS: Lista maestra (Tu lógica original intacta) ---
@@ -219,12 +220,10 @@ export class ListaAuditoriaAdminsPage implements OnInit {
             rawData.forEach((user: any) => {
               const acciones =
                 user.audit_admin_actions_audit_admin_actions_admin_idTousers;
-              if (acciones && acciones.length > 0) {
+              if (acciones?.length) {
                 acciones.forEach((act: any) =>
                   mappedData.push(this.mapearItemUnico(user, act)),
                 );
-              } else {
-                mappedData.push(this.crearItemSinActividad(user));
               }
             });
           } else {
@@ -249,8 +248,7 @@ export class ListaAuditoriaAdminsPage implements OnInit {
 
           this.finalizarCarga();
         },
-        error: (err) =>
-          console.error('Error cargando auditoría de admins', err),
+        error: () => appLogger.error('Error cargando auditoría de admins'),
       });
     }
   }
@@ -259,22 +257,6 @@ export class ListaAuditoriaAdminsPage implements OnInit {
   private finalizarCarga() {
     this.generarFiltrosDinamicos();
     this.auditoriaFiltrada = this.procesarDatosVisuales(this.auditoriaAll);
-  }
-
-  private crearItemSinActividad(user: any) {
-    return {
-      id: 0,
-      adminId: user.id,
-      adminNombre: user.full_name || 'Admin',
-      adminCorreo: user.email,
-      accion: 'SIN_ACTIVIDAD',
-      fechaISO: user.created_at,
-      metadata: null,
-      alarmaId: null,
-      alarmaNombre: 'Sin movimientos',
-      alarmaCodigo: 'N/A',
-      alarmaUbicacion: 'N/A',
-    };
   }
 
   private mapearItemUnico(user: any, act: any) {
@@ -291,7 +273,11 @@ export class ListaAuditoriaAdminsPage implements OnInit {
       act.old_value?.node_name ||
       null;
     const codigoDesdePayload =
-      act.new_value?.code || act.old_value?.code || act.new_value?.node_code || act.old_value?.node_code || null;
+      act.new_value?.code ||
+      act.old_value?.code ||
+      act.new_value?.node_code ||
+      act.old_value?.node_code ||
+      null;
 
     let detalleManual = '';
     // Expandimos la lista de acciones que generan este detalle rápido
@@ -316,7 +302,9 @@ export class ListaAuditoriaAdminsPage implements OnInit {
 
       // Intentamos sacar nombre/código del objeto nodo vinculado por Prisma
       const nombreNodo =
-        nodo?.name || nodoDesdePayload || 'Nodo #' + (act.node_id || 'ID Desconocido');
+        nodo?.name ||
+        nodoDesdePayload ||
+        'Nodo #' + (act.node_id || 'ID Desconocido');
       const codigoNodo = nodo?.code || codigoDesdePayload || 'S/N';
 
       detalleManual = `${estado}: ${nombreNodo} (Código: ${codigoNodo})`;
@@ -336,30 +324,13 @@ export class ListaAuditoriaAdminsPage implements OnInit {
         affectedUser: act.users_audit_admin_actions_affected_user_idTousers,
       },
       alarmaId: act.node_id || null,
-      alarmaNombre: nodo?.name || nodoDesdePayload || FALLBACK_TRADUCCION.NOMBRE,
-      alarmaCodigo: nodo?.code || codigoDesdePayload || FALLBACK_TRADUCCION.CODIGO,
+      alarmaNombre:
+        nodo?.name || nodoDesdePayload || FALLBACK_TRADUCCION.NOMBRE,
+      alarmaCodigo:
+        nodo?.code || codigoDesdePayload || FALLBACK_TRADUCCION.CODIGO,
       // CORRECCIÓN 2: En tu Prisma el campo es 'location'
       alarmaUbicacion: nodo?.location || FALLBACK_TRADUCCION.UBICACION,
     };
-  }
-
-  cargarSoloNodosExistentes() {
-    // Llama a un nuevo método en tu service que traiga los nodos base
-    this.auditService.getNodes().subscribe({
-      next: (res: any) => {
-        const baseNodes = res.data || [];
-        this.auditoriaAll = baseNodes.map((n: any) => ({
-          ...n,
-          accion: 'SIN_ACTIVIDAD',
-          accionTraducida: 'DISPONIBLE',
-          adminNombre: 'N/A',
-          resumenDinamico:
-            'Esta alarma no presenta registros de uso recientes.',
-          fechaISO: new Date().toISOString(),
-        }));
-        this.auditoriaFiltrada = this.procesarDatosVisuales(this.auditoriaAll);
-      },
-    });
   }
 
   generarFiltrosDinamicos() {
@@ -393,8 +364,7 @@ export class ListaAuditoriaAdminsPage implements OnInit {
           nombre: n.name || `Alarma ${n.code || n.id}`,
         }));
       },
-      error: (err) =>
-        console.error('Error cargando lista maestra de alarmas', err),
+      error: () => appLogger.error('Error cargando lista maestra de alarmas'),
     });
   }
 
@@ -442,7 +412,7 @@ export class ListaAuditoriaAdminsPage implements OnInit {
         // 3. Procesamos los datos visuales (colores de los badges, etc.)
         this.auditoriaFiltrada = this.procesarDatosVisuales(this.auditoriaAll);
       },
-      error: (err) => console.error('Error cargando alarmas:', err),
+      error: () => appLogger.error('Error cargando alarmas'),
     });
   }
 

@@ -48,7 +48,6 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
-
     // Rutas públicas, logout y refresh no deben disparar lógica de refresh.
     if (
       this.isPublicRoute(req) ||
@@ -77,7 +76,9 @@ export class AuthInterceptor implements HttpInterceptor {
     );
   }
 
-  private async secureApiRequest(req: HttpRequest<any>): Promise<HttpRequest<any>> {
+  private async secureApiRequest(
+    req: HttpRequest<any>,
+  ): Promise<HttpRequest<any>> {
     let securedRequest = req.clone({ withCredentials: true });
 
     const csrfToken = await this.resolveCsrfToken();
@@ -106,23 +107,25 @@ export class AuthInterceptor implements HttpInterceptor {
     this.lastRefreshError = null;
     this.refreshTokenSubject.next('refreshing');
 
-    return this.authService.refreshToken({ preserveSessionOnFailure: Capacitor.isNativePlatform() }).pipe(
-      switchMap(() => {
-        this.isRefreshing = false;
-        this.refreshTokenSubject.next('succeeded');
+    return this.authService
+      .refreshToken({ preserveSessionOnFailure: Capacitor.isNativePlatform() })
+      .pipe(
+        switchMap(() => {
+          this.isRefreshing = false;
+          this.refreshTokenSubject.next('succeeded');
 
-        return next.handle(req);
-      }),
-      catchError((err) => {
-        this.isRefreshing = false;
-        this.lastRefreshError = err;
-        this.refreshTokenSubject.next('failed');
-        if (!Capacitor.isNativePlatform()) {
-          void this.authService.handleAuthFailureLocal();
-        }
-        return throwError(() => err);
-      }),
-    );
+          return next.handle(req);
+        }),
+        catchError((err) => {
+          this.isRefreshing = false;
+          this.lastRefreshError = err;
+          this.refreshTokenSubject.next('failed');
+          if (!Capacitor.isNativePlatform()) {
+            void this.authService.handleAuthFailureLocal();
+          }
+          return throwError(() => err);
+        }),
+      );
   }
 
   /* -------------------------------------------------------------------------- */
@@ -150,23 +153,27 @@ export class AuthInterceptor implements HttpInterceptor {
       this.lastRefreshError = null;
       this.refreshTokenSubject.next('refreshing');
 
-      return this.authService.refreshToken({ preserveSessionOnFailure: Capacitor.isNativePlatform() }).pipe(
-        switchMap(() => {
-          this.isRefreshing = false;
-          this.refreshTokenSubject.next('succeeded');
+      return this.authService
+        .refreshToken({
+          preserveSessionOnFailure: Capacitor.isNativePlatform(),
+        })
+        .pipe(
+          switchMap(() => {
+            this.isRefreshing = false;
+            this.refreshTokenSubject.next('succeeded');
 
-          return next.handle(req);
-        }),
-        catchError((err) => {
-          this.isRefreshing = false;
-          this.lastRefreshError = err;
-          this.refreshTokenSubject.next('failed');
-          if (!Capacitor.isNativePlatform()) {
-            void this.authService.handleAuthFailureLocal();
-          }
-          return throwError(() => err);
-        }),
-      );
+            return next.handle(req);
+          }),
+          catchError((err) => {
+            this.isRefreshing = false;
+            this.lastRefreshError = err;
+            this.refreshTokenSubject.next('failed');
+            if (!Capacitor.isNativePlatform()) {
+              void this.authService.handleAuthFailureLocal();
+            }
+            return throwError(() => err);
+          }),
+        );
     }
 
     // Requests concurrentes esperan el token renovado
@@ -205,7 +212,8 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private async resolveCsrfToken(): Promise<string | null> {
-    const sessionCsrfToken = this.sessionService.getCurrentSession()?.csrf_token;
+    const sessionCsrfToken =
+      this.sessionService.getCurrentSession()?.csrf_token;
     if (sessionCsrfToken) {
       return sessionCsrfToken;
     }

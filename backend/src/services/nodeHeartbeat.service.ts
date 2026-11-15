@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { config } from '../config';
 import { getIO } from '../index';
 import { pingNodeByCommunication } from './nodeCommunication.service';
+import { notifyNodeStateChange } from './telegram.service';
 
 const prisma = new PrismaClient();
 
@@ -23,12 +24,15 @@ export async function runHeartbeat() {
       },
       select: {
         id: true,
+        name: true,
         code: true,
         communication_method: true,
         ip_address: true,
         rf_slot: true,
         rf_address: true,
         is_online: true,
+        is_alarm_on: true,
+        is_enabled: true,
       },
       orderBy: { id: 'asc' },
     });
@@ -78,6 +82,14 @@ export async function runHeartbeat() {
           timestamp: new Date(),
           reason: isOnlineNow ? 'HEARTBEAT_RECOVERY' : 'HEARTBEAT_FAILURE',
         });
+
+        await notifyNodeStateChange(
+          {
+            ...node,
+            is_online: isOnlineNow,
+          },
+          { online: true }
+        );
       } else {
         // Sin cambios, solo mostrar estado actual
         console.log(

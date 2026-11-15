@@ -21,6 +21,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Alarmas, Alarma } from 'src/app/administrator_pages/services/alarmas';
 import { BackendResponse } from 'src/app/administrator_pages/services/user-nodes';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   selector: 'app-node-selector',
@@ -77,7 +78,7 @@ export class NodeSelectorComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: (err: any) => {
-          console.error('Error cargando alarmas', err);
+          appLogger.error('Error cargando alarmas');
           this.errorMessage =
             'Error al cargar alarmas. Por favor recarga la página.';
           this.loading = false;

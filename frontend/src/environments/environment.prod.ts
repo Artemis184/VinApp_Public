@@ -5,9 +5,11 @@
 export const environment = {
   production: true,
   apiUrl: 'https://vinback.artemisnet.cloud/api',
+  webUrl: 'https://vinapp.artemisnet.cloud',
   urlLogo: 'https://vinapp.artemisnet.cloud/assets/favicon.png',
   apiTimeout: 60000,
   google: {
-    clientId: '741452035882-pbbosuoteib17ao47v6gci0aak00ge9s.apps.googleusercontent.com'
+    clientId:
+      'TU_CLIENT_ID.apps.googleusercontent.com',
   },
 };

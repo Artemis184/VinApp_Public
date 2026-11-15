@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="app_name">VinApp</string>
+  <string name="title_activity_main">VinApp</string>
+  <!-- El package_name DEBE ser tu identificador de Android, no "VinApp" -->
+  <string name="package_name">cloud.artemisnet.vinapp</string>
+  <string name="custom_url_scheme">cloud.artemisnet.vinapp</string>
+  <!-- Aquí es obligatorio quemar el ID de Cliente Web -->
+  <string name="server_client_id">TU_CLIENT_ID.apps.googleusercontent.com</string>
+</resources>

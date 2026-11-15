@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { AUTH_STORAGE } from 'src/constants/app.constants';
+import { appLogger } from 'src/app/core/logger.service';
 
 /**
  * Servicio de almacenamiento con cifrado AES-GCM.
@@ -25,10 +26,7 @@ export class SecureStorageService {
     try {
       this._storage = await this.storage.create();
     } catch (error) {
-      console.error(
-        'Error inicializando storage, se usará fallback local:',
-        error,
-      );
+      appLogger.error('Error inicializando storage, se usará fallback local');
       this._storage = null;
     } finally {
       this.isInitialized = true;
@@ -67,7 +65,7 @@ export class SecureStorageService {
         localStorage.setItem(key, encrypted);
       }
     } catch (error) {
-      console.error(`Error guardando clave ${key}:`, error);
+      appLogger.error('Error guardando valor en storage');
       throw error;
     }
   }
@@ -97,7 +95,7 @@ export class SecureStorageService {
         }
       }
     } catch (error) {
-      console.error(`Error leyendo clave ${key}:`, error);
+      appLogger.error('Error leyendo valor de storage');
       return null;
     }
   }
@@ -115,7 +113,7 @@ export class SecureStorageService {
         localStorage.removeItem(key);
       }
     } catch (error) {
-      console.error(`Error eliminando clave ${key}:`, error);
+      appLogger.error('Error eliminando valor de storage');
       throw error;
     }
   }
@@ -135,7 +133,7 @@ export class SecureStorageService {
 
       localStorage.removeItem(AUTH_STORAGE.ENC_KEY_JWK);
     } catch (error) {
-      console.error('Error limpiando storage:', error);
+      appLogger.error('Error limpiando storage');
       throw error;
     }
   }
@@ -163,7 +161,7 @@ export class SecureStorageService {
         ? await this._storage.keys()
         : Object.keys(localStorage);
     } catch (error) {
-      console.error('Error obteniendo claves:', error);
+      appLogger.error('Error obteniendo claves de storage');
       return [];
     }
   }

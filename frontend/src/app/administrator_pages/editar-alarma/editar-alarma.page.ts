@@ -22,6 +22,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { Subject, of } from 'rxjs';
 import { takeUntil, switchMap, finalize } from 'rxjs/operators';
+import { appLogger } from 'src/app/core/logger.service';
 
 import { Alarmas, Alarma } from 'src/app/administrator_pages/services/alarmas';
 import { AdminBackHeaderComponent } from 'src/app/shared/admin-back-header/admin-back-header.component';
@@ -94,12 +95,12 @@ export class EditarAlarmaPage implements OnInit, OnDestroy {
           this.alarma = { ...encontrada };
           this.imagenOriginal = encontrada.installation_image || '';
           this.isEnabledOriginal = encontrada.is_enabled;
-          this.previewImg = encontrada.installation_image
-            ? `${environment.apiUrl.replace('/api', '')}${encontrada.installation_image}`
-            : null;
+          this.previewImg = this.alarmasService.getImageUrl(
+            encontrada.installation_image,
+          );
         },
         error: (error) => {
-          console.error('Error al cargar alarma:', error);
+          appLogger.error('Error al cargar alarma');
           this.toast('Error al cargar la alarma', 'danger');
           this.navCtrl.back();
         },
@@ -124,9 +125,8 @@ export class EditarAlarmaPage implements OnInit, OnDestroy {
     const nameOk = this.alarma.name.trim().length > 0;
     const descOk = (this.alarma.description ?? '').trim().length > 0;
     const locOk = (this.alarma.location ?? '').trim().length > 0;
-    const rfOk = (this.alarma.rf_address ?? '').trim().length > 0;
 
-    return nameOk && descOk && locOk && rfOk && !this.guardando;
+    return nameOk && descOk && locOk && !this.guardando;
   }
 
   async onFileSelected(event: Event) {
@@ -167,14 +167,12 @@ export class EditarAlarmaPage implements OnInit, OnDestroy {
     const code = this.alarma.code.trim().toUpperCase();
     const description = (this.alarma.description ?? '').trim();
     const location = (this.alarma.location ?? '').trim();
-    const rf_address = (this.alarma.rf_address ?? '').trim();
 
     // validar campos vacíos
     const faltantes: string[] = [];
     if (!name) faltantes.push('Nombre');
     if (!description) faltantes.push('Descripción');
     if (!location) faltantes.push('Ubicación');
-    if (!rf_address) faltantes.push('RF Address');
 
     if (faltantes.length > 0) {
       await this.toast(`Completa: ${faltantes.join(', ')}`, 'warning');
@@ -195,7 +193,6 @@ export class EditarAlarmaPage implements OnInit, OnDestroy {
     formData.append('code', code);
     formData.append('description', description);
     formData.append('location', location);
-    formData.append('rf_address', rf_address);
 
     // 👉 Solo si el usuario seleccionó nueva imagen
     if (this.selectedFile) {
@@ -241,7 +238,7 @@ export class EditarAlarmaPage implements OnInit, OnDestroy {
           this.navCtrl.back();
         },
         error: async (error) => {
-          console.error('Error al guardar alarma:', error);
+          appLogger.error('Error al guardar alarma');
           if (!hasEnabledChanged) {
             await this.toast('Ocurrió un error al guardar', 'danger');
           } else if (shouldEnable) {

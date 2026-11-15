@@ -11,6 +11,13 @@
   animation: fadeSlide 0.18s ease-out;
 }
 
+.header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .account-item {
   width: 100%;
   background: transparent;

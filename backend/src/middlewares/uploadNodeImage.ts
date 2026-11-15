@@ -1,28 +1,19 @@
 import multer from 'multer';
-import path from 'path';
+import { UPLOAD_CONFIG } from '../constants/constants';
 
-// Ruta base compatible con Linux y Windows
-const uploadPath = path.join(process.cwd(), 'src', 'uploads', 'nodes_images');
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
-});
+// Allowlist estricta: antes se aceptaba cualquier `image/*`, lo que incluía
+// `image/svg+xml` (un SVG puede ejecutar JS → XSS almacenado al servirlo inline).
+const allowedMimetypes: ReadonlySet<string> = new Set(UPLOAD_CONFIG.ALLOWED_AVATAR_MIME_TYPES);
 
 export const uploadNodeImage = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024,
+    files: 1,
   },
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Solo se permiten imágenes'));
+    if (!allowedMimetypes.has(file.mimetype)) {
+      return cb(new Error('Formato de imagen no permitido. Usa JPG, PNG o WEBP'));
     }
     cb(null, true);
   },

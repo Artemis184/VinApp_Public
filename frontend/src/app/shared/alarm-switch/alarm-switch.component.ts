@@ -15,6 +15,7 @@ import {
 } from '@ionic/angular/standalone';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs';
+import { appLogger } from 'src/app/core/logger.service';
 
 export interface AlarmaUI {
   id: number;
@@ -81,12 +82,12 @@ export class AlarmSwitchComponent implements OnInit, OnDestroy {
           ) {
             alarma.isOnline = false;
             alarma.lastError = message;
-            console.warn(`🔴 Nodo ${nodeId} sin conectividad RF24: ${message}`);
+            appLogger.warn('Nodo sin conectividad RF24');
           }
         }
 
         const message = err?.message || 'Error al cambiar estado de alarma';
-        console.error('node:error', message);
+        appLogger.error('Error recibido del nodo');
         const t = await this.toastCtrl.create({
           header: 'Error',
           message,
@@ -106,9 +107,9 @@ export class AlarmSwitchComponent implements OnInit, OnDestroy {
           alarma.isOnline = data.is_online;
 
           if (!wasOnline && data.is_online) {
-            console.log(`✅ Nodo ${data.nodeId} recuperó conectividad RF24`);
+            appLogger.log('Nodo recuperó conectividad RF24');
           } else if (wasOnline && !data.is_online) {
-            console.warn(`🔴 Nodo ${data.nodeId} perdió conectividad RF24`);
+            appLogger.warn('Nodo perdió conectividad RF24');
           }
         }
       }),
@@ -143,7 +144,7 @@ export class AlarmSwitchComponent implements OnInit, OnDestroy {
           alarma.loading = false;
           alarma.isOnline = false;
           alarma.lastError = 'Timeout: nodo no respondió';
-          console.warn(`⚠️ Timeout - Nodo ${alarma.id} sin conectividad`);
+          appLogger.warn('Timeout de conectividad del nodo');
         }
       }, 8000);
     } else {

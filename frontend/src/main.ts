@@ -77,6 +77,7 @@ import {
   funnel,
   funnelOutline,
   searchOutline,
+  search,
   apps,
   personAdd,
   logIn,
@@ -87,6 +88,12 @@ import {
   removeCircle,
   cloud,
   cameraOutline,
+  home,
+  list,
+  people,
+  alert,
+  document,
+  pulseOutline,
 } from 'ionicons/icons';
 
 // REGISTRA ICONOS
@@ -136,6 +143,7 @@ addIcons({
   funnel: funnel,
   'funnel-outline': funnelOutline,
   'search-outline': searchOutline,
+  search: search,
   apps: apps,
   'person-add': personAdd,
   'log-in': logIn,
@@ -146,6 +154,13 @@ addIcons({
   'remove-circle': removeCircle,
   cloud: cloud,
   'camera-outline': cameraOutline,
+  home: home,
+  list: list,
+  people: people,
+  alert: alert,
+  lock: lockClosed,
+  document: document,
+  'pulse-outline': pulseOutline,
 });
 
 bootstrapApplication(AppComponent, {

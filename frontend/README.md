@@ -1,11 +1,11 @@
-# 🔷 SmartVin – Frontend of the VinApp Project
+# � SmartVin – Frontend del Proyecto de Vinculación
 
-Frontend of the system developed for the **VinApp project**, focused on node control, user management, roles, auditing, and notifications.
-Built with **Ionic, Angular, and Capacitor**.
+Frontend del sistema desarrollado para el **Proyecto de Vinculación**, orientado al control de nodos, gestión de usuarios, roles, auditorías y notificaciones.  
+Construido con **Ionic, Angular y Capacitor**.
 
 ---
 
-## 🚀 Technologies Used
+## 🚀 Tecnologías Utilizadas
 
 - Ionic Framework
 - Angular
@@ -18,7 +18,7 @@ Built with **Ionic, Angular, and Capacitor**.
 
 ---
 
-## 📂 Project Structure
+## 📂 Estructura del Proyecto
 
 ```
 src/
@@ -55,17 +55,17 @@ README.md
 
 ---
 
-## ⚙️ Prerequisites
+## ⚙️ Requisitos Previos
 
-- Node.js v18 or higher
-- npm v9 or higher
+- Node.js v18 o superior
+- npm v9 o superior
 - Ionic CLI (`npm install -g @ionic/cli`)
 
 ---
 
-## 🔐 Environment Variables
+## 🔐 Variables de Entorno
 
-Create a `.env` file in the project root with the following content:
+Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 
 ```env
 API_URL=http://localhost:3000/api
@@ -73,13 +73,13 @@ URL_LOGO=https://example.com/logo.png
 API_TIMEOUT=60000
 ```
 
-Environment files are generated automatically from `.env` when running `npm start` or `npm run build`. No manual commands are required.
+Los archivos de environment se generan automáticamente desde `.env` al ejecutar `npm start` o `npm run build`. No es necesario ejecutar comandos manuales.
 
 ---
 
-## 📦 Project Installation
+## 📦 Instalación del Proyecto
 
-Install all dependencies:
+Instala todas las dependencias:
 
 ```bash
 npm install
@@ -87,27 +87,27 @@ npm install
 
 ---
 
-## 🏃 Running the Project
+## 🏃 Ejecución del Proyecto
 
-### 🔧 Development Mode
+### 🔧 Modo Desarrollo
 
 ```bash
 npm start
-# or
+# o
 ionic serve
 ```
 
-This starts the development server at `http://localhost:8100`.
+Esto iniciará el servidor de desarrollo en `http://localhost:8100`.
 
-### 🏗️ Production Build
+### 🏗️ Compilación a Producción
 
 ```bash
 npm run build
-# or
+# o
 ionic build
 ```
 
-### ▶️ Production Mode
+### ▶️ Modo Producción
 
 ```bash
 npm run build --prod
@@ -115,7 +115,7 @@ npm run build --prod
 
 ---
 
-## 📱 Mobile Builds
+## 📱 Construcción para Móviles
 
 ### Android
 
@@ -133,37 +133,37 @@ ionic capacitor run ios
 
 ---
 
-## 🧪 Available Scripts
+## 🧪 Scripts Disponibles
 
-| Script             | Description                                        |
-| ------------------ | -------------------------------------------------- |
-| `npm start`        | Runs the app in development mode (Angular)        |
-| `ionic serve`      | Runs the app in development mode (Ionic)          |
-| `npm run build`    | Builds the project for production                 |
-| `npm run watch`    | Builds and watches for changes                    |
-| `npm test`         | Runs unit tests                                    |
-| `npm run lint`     | Runs ESLint checks                                 |
-| `npm run format`   | Formats the code with Prettier                     |
-
----
-
-## 🔒 Security
-
-- Integration with backend for JWT authentication
-- Role and permission management
-- Encryption of sensitive data
+| Script             | Descripción                            |
+| ------------------ | -------------------------------------- |
+| `npm start`        | Ejecuta el servidor en modo desarrollo (Angular) |
+| `ionic serve`    | Ejecuta el servidor en modo desarrollo (Ionic) |
+| `npm run build`    | Compila el proyecto para producción    |
+| `npm run watch`    | Compila y observa cambios              |
+| `npm test`         | Ejecuta las pruebas unitarias          |
+| `npm run lint`     | Analiza errores con ESLint             |
+| `npm run format`   | Formatea el código con Prettier        |
 
 ---
 
-## 🧹 Code Quality
+## 🔒 Seguridad
 
-This project uses:
+- Integración con backend para autenticación JWT
+- Control de roles y permisos
+- Encriptación de datos sensibles
 
-- **ESLint** for code validation
-- **Angular CLI** for development tooling
-- Configuration compatible with TypeScript and Angular
+---
 
-**Recommended workflow:**
+## 🧹 Calidad de Código
+
+Este proyecto utiliza:
+
+- **ESLint** para validación de código
+- **Angular CLI** para herramientas de desarrollo
+- Configuración compatible con TypeScript y Angular
+
+**Flujo recomendado:**
 
 ```bash
 npm run lint
@@ -172,13 +172,13 @@ npm start
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Autor
 
 **ArtemisNet**  
-Project developed for the security and node management system of the VinApp project, UPSE - 2026.
+Proyecto desarrollado para el sistema de seguridad y gestión de nodos del Proyecto de Vinculación.
 
 ---
 
-## 📄 License
+## 📄 Licencia
 
-This project is distributed under the **ISC** license.
+Este proyecto se distribuye bajo la licencia **ISC**.

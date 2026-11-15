@@ -16,6 +16,7 @@ import { validationUtils } from '../../middlewares/validationMiddleware';
 
 import { verifyToken } from '../../middlewares/verifyToken';
 import { requireAdmin } from '../../middlewares/authorizeRoles';
+import { registerRateLimiter } from '../../middlewares/authRateLimit';
 import { adminAudit } from '../../middlewares/auditoria/adminAudit';
 import { userAudit } from '../../middlewares/auditoria/userAudit';
 import { PrismaClient, admin_action_type, user_status, user_action_type } from '@prisma/client';
@@ -171,12 +172,14 @@ router.post(
   '/users/postuserwithemail',
   // #swagger.tags = ['Users']
   // #swagger.description = 'Crea un usuario con email'
+  registerRateLimiter,
   postUserWithEmail
 );
 router.post(
   '/users/postusergoogle',
   // #swagger.tags = ['Users']
   // #swagger.description = 'Crea un usuario con Google'
+  registerRateLimiter,
   postUserGoogle
 );
 
@@ -185,11 +188,18 @@ router.post(
    (STEP 2)
 ====================================== */
 
+// PASO 2 del registro: el usuario aún está PENDING y no tiene JWT, por eso no
+// lleva verifyToken. Endurecemos con: rate limit (evita barrido de UUIDs),
+// saneo de entrada, y el service ya restringe la acción a usuarios en PENDING.
+// NOTA (follow-up recomendado, PR separado): emitir un "registration token"
+// firmado en el PASO 1 y exigirlo aquí para ligar la petición al dueño real.
 router.patch(
   '/users/register/:userId',
   // #swagger.tags = ['Users']
   // #swagger.description = 'Completa los datos personales del usuario en el registro (PASO 2)'
+  registerRateLimiter,
   validateUserIdParam,
+  sanitizeProfileUpdate,
   patchPersonalData
 );
 
@@ -248,6 +258,7 @@ router.patch(
   // #swagger.tags = ['Users']
   // #swagger.description = 'Actualiza los datos de OTRO usuario (solo admin)'
   verifyToken,
+  requireAdmin,
   validateUserIdParam,
   adminAudit({
     action: admin_action_type.UPDATE_USER_DATA,
@@ -338,11 +349,17 @@ router.patch(
   - ACCION_TYPE = UPDATE_USER_DATA
   - METADATA con los campos modificados
 */
+// IMPORTANTE: patchUser rechaza editar la propia cuenta (adminId === id) y
+// redirige a PATCH /users/profile. Por tanto esta ruta SOLO sirve para editar a
+// OTROS usuarios, así que debe ser exclusiva de ADMIN/MASTER. Antes no tenía
+// control de rol → un CLIENTE autenticado podía cambiar password/email/status
+// de cualquier otro usuario (toma de cuenta / auto-aprobación).
 router.patch(
   '/user_updatedata/:userId',
   // #swagger.tags = ['Users']
-  // #swagger.description = 'Permite al usuario actualizar su propia información'
+  // #swagger.description = 'Actualiza datos de otro usuario (solo ADMIN/MASTER)'
   verifyToken,
+  requireAdmin,
   validateUserIdParam,
   userAudit({
     action: user_action_type.UPDATE_USER_DATA,

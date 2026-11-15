@@ -165,7 +165,7 @@ Carga el código corregido `ESP8266_MAESTRO_FIXED.ino` y abre Serial Monitor:
 
 ```
 ✅ WiFi OK
-📍 IP: 192.168.4.30
+📍 IP: 10.0.0.30
 ✅ NRF24 OK
    Canal: 90
    Potencia: 3

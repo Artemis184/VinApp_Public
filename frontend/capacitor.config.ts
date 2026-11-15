@@ -1,12 +1,29 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'cloud.artemisnet.vinapp',
   appName: 'VinApp',
   webDir: 'www',
-  // En desarrollo local preferimos no fijar `server.url` para que la app use
-  // los assets empaquetados en `www`. Si quieres que la app cargue contenido
-  // remoto, restaura esta sección con la URL correspondiente.
+  server: {
+    // Origen https://localhost en Android: requisito para que el WebView acepte
+    // cookies Secure; SameSite=None del backend permite enviarlas a vinback.
+    androidScheme: 'https',
+  },
+  plugins: {
+    // Persiste el jar de cookies del WebView (incluye refresh HttpOnly) entre
+    // reinicios de la app -> sesión persistente estilo WhatsApp/FB.
+    // El backend debe emitir las cookies con SameSite=None; Secure y
+    // Domain=.artemisnet.cloud (ver docs/dokploy-environments.md).
+    CapacitorCookies: {
+      enabled: true,
+    },
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      // Quema el ID de Cliente Web aquí. No uses la importación de Angular.
+      serverClientId: 'TU_CLIENT_ID.apps.googleusercontent.com',
+      forceCodeForRefreshToken: true,
+    },
+  },
 };
 
 export default config;

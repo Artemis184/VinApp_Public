@@ -23,6 +23,7 @@ import {
 } from '@ionic/angular/standalone';
 import { AdminBackHeaderComponent } from 'src/app/shared/admin-back-header/admin-back-header.component';
 import { AuditoriaService } from '../services/auditoria';
+import { appLogger } from 'src/app/core/logger.service';
 
 @Component({
   standalone: true,
@@ -114,7 +115,7 @@ export class AdminAuditoriaPage implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          console.error('Error API Auditoría:', err);
+          appLogger.error('Error API Auditoría');
           this.loading = false;
           this.mostrarErrorToast('No se pudo cargar el historial.');
         },
@@ -131,7 +132,7 @@ export class AdminAuditoriaPage implements OnInit {
         }));
       },
       error: (err) => {
-        console.error('Error catálogo:', err);
+        appLogger.error('Error catálogo');
         this.mostrarErrorToast('Error al cargar lista de alarmas.');
       },
     });

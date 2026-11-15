@@ -32,15 +32,6 @@ export class RoleGuard implements CanActivate {
     const rol = currentUser.role;
     const isMaster = !!currentUser.is_master;
 
-    console.log(
-      'RoleGuard - usuario:',
-      currentUser,
-      '| is_master:',
-      isMaster,
-      '| roles requeridos:',
-      requiredRoles,
-    );
-
     // Ruta para Cliente
     if (requiredRoles.includes(APP_ROLES.FINAL_USER)) {
       if (rol === APP_ROLES.FINAL_USER) return true;
